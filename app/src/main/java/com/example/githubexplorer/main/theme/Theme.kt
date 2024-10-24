@@ -1,4 +1,4 @@
-package com.example.githubexplorer.ui.theme
+package com.example.githubexplorer.main.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
