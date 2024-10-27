@@ -1,4 +1,4 @@
-package com.example.app.presentation.view_binding
+package com.example.githubexplorer.base.mvvm.view_binding
 
 import android.app.Activity
 import android.view.LayoutInflater

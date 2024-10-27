@@ -1,4 +1,4 @@
-package com.example.shwarz.mycountries.commons.view_binding
+package com.example.githubexplorer.base.mvvm.view_binding
 
 import android.view.View
 import androidx.fragment.app.Fragment

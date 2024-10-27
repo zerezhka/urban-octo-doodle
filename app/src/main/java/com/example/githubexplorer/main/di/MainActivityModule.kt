@@ -2,23 +2,25 @@ package com.example.githubexplorer.main.di
 
 import com.example.githubexplorer.BuildConfig
 import com.example.githubexplorer.main.data.GithubClient
-import com.example.githubexplorer.main.repository.LocalDataSource
-import com.example.githubexplorer.main.repository.RemoteDataSource
-import com.example.githubexplorer.main.repository.SearchRepository
-import com.example.githubexplorer.main.ui.MainActivityPresenter
-import com.example.githubexplorer.main.ui.MainScreenContract
+import com.example.githubexplorer.main.ui.MainActivityViewModel
+import com.example.githubexplorer.main.usecase.SearchUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
-@InstallIn(ActivityComponent::class)
+// provides at whole Application lvl for now, because of OkHttp (and it is singleton)
+// todo refactor okhttp to another dagger module
+// todo return to ActivityComponent::class
+// @InstallIn(ActivityComponent::class)
+@InstallIn(SingletonComponent::class)
 object MainActivityModule {
     @Provides
-    fun provideMainScreenPresenter(): MainScreenContract.Presenter {
-        return MainActivityPresenter()
+    fun provideMainScreenViewModel(usecase: SearchUseCase): MainActivityViewModel {
+        return MainActivityViewModel(usecase)
     }
 
     @Singleton
@@ -29,17 +31,8 @@ object MainActivityModule {
 
     @Singleton
     @Provides
-    fun provideRepository(localDataSource: LocalDataSource, remoteDataSource: RemoteDataSource): SearchRepository {
-        return SearchRepository(localDataSource, remoteDataSource)
-    }
-    @Provides
-    @Singleton
-    fun provideLocalDataSource(): LocalDataSource {
-        return LocalDataSource()
-    }
-    @Provides
-    @Singleton
-    fun provideRemoteDataSource(): RemoteDataSource {
-        return RemoteDataSource()
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .build()
     }
 }

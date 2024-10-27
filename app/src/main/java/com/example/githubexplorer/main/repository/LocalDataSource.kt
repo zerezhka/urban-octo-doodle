@@ -2,9 +2,10 @@ package com.example.githubexplorer.main.repository
 
 import com.example.githubexplorer.main.data.GithubRepository
 import com.example.githubexplorer.main.data.GithubUser
+import javax.inject.Inject
 
-class LocalDataSource : DataSource {
-    override fun search(query: String): List<GithubUser> {
+class LocalDataSource @Inject constructor() : DataSource {
+    override suspend fun search(query: String): List<GithubUser> {
         //todo get from local db
         return listOf(
             // https://github.com/zerezhka?tab=repositories
@@ -16,7 +17,7 @@ class LocalDataSource : DataSource {
         )
     }
 
-    override fun getRepositories(user: String): List<GithubRepository> {
+    override suspend fun getRepositories(user: String): List<GithubRepository> {
         //todo get from local db
         return if (user == "zerezhka") {
             listOf(
