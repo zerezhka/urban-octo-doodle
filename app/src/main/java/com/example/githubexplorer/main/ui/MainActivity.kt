@@ -1,7 +1,6 @@
 package com.example.githubexplorer.main.ui
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -32,12 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    //    val viewBinding by viewBinding<MainActivityBinding>()
     val viewModel by viewModels<MainActivityViewModel>()
-
-//     val vm: MainActivityViewModel by lazy {
-//        ViewModelProvider(this as ViewModelStoreOwner)[MainActivityViewModel::class.java]
-//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -46,7 +40,7 @@ class MainActivity : ComponentActivity() {
         val stateIsLoading = viewModel.isLoading
         val clicker = {
             stateIsLoading.value = !stateIsLoading.value
-            Toast.makeText(this, "Hello! ${stateIsLoading.value}", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this, "Hello! ${stateIsLoading.value}", Toast.LENGTH_SHORT).show()
         }
         setContent {
             GithubExplorerTheme {
@@ -67,6 +61,10 @@ fun HelloScreen(clicker: () -> Unit = {}, innerPadding: PaddingValues) {
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Composabel.LoadingImageFromInternetCoil(
+                model = "https://avatars.githubusercontent.com/u/10316435?v=4",
+                contentDescription = "zerezhka avatar"
+            )
             Greeting(
                 name = "Android",
             )
@@ -95,7 +93,7 @@ fun Loading(clicker: () -> Unit) {
 }
 
 @Composable
-fun Greeting( name: String) {
+fun Greeting(name: String) {
         Text(
             text = "Hello $name!",
             textAlign = TextAlign.Center,

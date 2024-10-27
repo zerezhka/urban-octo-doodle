@@ -33,7 +33,7 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
+//        viewBinding = true
         buildConfig = true
     }
 
@@ -96,6 +96,10 @@ dependencies {
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.orbit.test)
+
+    // Coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.okhttp)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
