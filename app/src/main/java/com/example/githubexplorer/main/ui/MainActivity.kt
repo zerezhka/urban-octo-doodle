@@ -1,6 +1,5 @@
 package com.example.githubexplorer.main.ui
 
-import android.os.Build.VERSION
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -38,9 +37,7 @@ class MainActivity :
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (VERSION.SDK_INT >= 31) {
-            installSplashScreen()
-        }
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val clicker = { Toast.makeText(this, "Hello!", Toast.LENGTH_SHORT).show() }

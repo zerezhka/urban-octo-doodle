@@ -3,7 +3,7 @@ package com.example.githubexplorer.main.repository
 import com.example.githubexplorer.main.data.GithubRepository
 import com.example.githubexplorer.main.data.GithubUser
 
-class LocalGateway : Gateway {
+class LocalDataSource : DataSource {
     override fun search(query: String): List<GithubUser> {
         //todo get from local db
         return listOf(

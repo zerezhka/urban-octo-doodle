@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.parcelize)
 
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
@@ -21,8 +22,10 @@ android {
         val githubProperties = org.jetbrains.kotlin.konan.properties.Properties()
         githubProperties.load(keystoreFile.inputStream())
 
-        val clientId: String = System.getenv("GITHUB_CLIENT_ID") ?: githubProperties["github.properties.clentId"].toString()
-        val appId: String = System.getenv("GITHUB_APP_ID") ?: githubProperties["github.properties.appId"].toString()
+        val clientId: String = System.getenv("GITHUB_CLIENT_ID")
+            ?: githubProperties["github.properties.clentId"].toString()
+        val appId: String =
+            System.getenv("GITHUB_APP_ID") ?: githubProperties["github.properties.appId"].toString()
         buildConfigField("String", "GITHUB_CLIENT_ID", "\"${clientId}\"")
         buildConfigField("int", "GITHUB_APP_ID", appId)
 
@@ -58,8 +61,11 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // Compose
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
+
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
@@ -67,6 +73,18 @@ dependencies {
     implementation(libs.fragment.ktx)
     implementation(libs.androidx.splashscreen)
 
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+
+    //Coroutines
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Timber
+    implementation(libs.timber)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,7 +92,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
 }
