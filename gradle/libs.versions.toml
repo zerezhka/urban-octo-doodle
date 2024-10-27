@@ -1,8 +1,8 @@
 [versions]
 agp = "8.7.1"
 hiltAndroid = "2.52"
-ksp = "2.0.21-1.0.26"
 kotlin = "2.0.21"
+ksp = "2.0.21-1.0.26"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"

@@ -9,16 +9,29 @@ plugins {
 
 android {
     namespace = "com.example.githubexplorer"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.githubexplorer"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        val keystoreFile = project.rootProject.file("local.properties")
+        val githubProperties = org.jetbrains.kotlin.konan.properties.Properties()
+        githubProperties.load(keystoreFile.inputStream())
+
+        val clientId: String = System.getenv("GITHUB_CLIENT_ID") ?: githubProperties["github.properties.clentId"].toString()
+        val appId: String = System.getenv("GITHUB_APP_ID") ?: githubProperties["github.properties.appId"].toString()
+        buildConfigField("String", "GITHUB_CLIENT_ID", "\"${clientId}\"")
+        buildConfigField("int", "GITHUB_APP_ID", appId)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
     }
 
     buildTypes {
@@ -43,7 +56,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
