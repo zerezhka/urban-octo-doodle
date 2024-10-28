@@ -1,4 +1,4 @@
-package com.example.githubexplorer.main.di
+package com.example.githubexplorer.di
 
 import android.content.Context
 import androidx.room.Room
@@ -9,6 +9,7 @@ import com.example.githubexplorer.main.db.dao.ReposDao
 import com.example.githubexplorer.main.db.dao.UsersDao
 import com.example.githubexplorer.main.ui.MainActivityViewModel
 import com.example.githubexplorer.main.usecase.SearchUseCase
+import com.example.githubexplorer.network.TimberLoggingInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,6 +40,7 @@ object MainActivityModule {
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
+            .addInterceptor(TimberLoggingInterceptor())
             .build()
     }
 

@@ -63,7 +63,6 @@ fun HelloScreen(clicker: () -> Unit = {}, innerPadding: PaddingValues) {
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            // recompose on click? i don't need it
             Composabel.LoadingImageFromInternetCoil(
                 model = "https://avatars.githubusercontent.com/u/10316435?v=4",
                 contentDescription = "zerezhka avatar",
