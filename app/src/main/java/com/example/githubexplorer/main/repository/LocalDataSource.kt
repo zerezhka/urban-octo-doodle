@@ -2,9 +2,11 @@ package com.example.githubexplorer.main.repository
 
 import com.example.githubexplorer.main.data.GithubRepository
 import com.example.githubexplorer.main.data.GithubUser
+import com.example.githubexplorer.main.db.dao.ReposDao
+import com.example.githubexplorer.main.db.dao.UsersDao
 import javax.inject.Inject
 
-class LocalDataSource @Inject constructor() : DataSource {
+class LocalDataSource @Inject constructor(val reposDao: ReposDao, val usersDao: UsersDao) : DataSource {
     override suspend fun search(query: String): List<GithubUser> {
         //todo get from local db
         return listOf(
@@ -33,7 +35,9 @@ class LocalDataSource @Inject constructor() : DataSource {
                 GithubRepository("good_training_language", "https://github.com/tsoding/good_training_language"),
                 )
         } else {
-            emptyList()
+            reposDao.getRepos().map {
+                Converter.fromDatabase(it)
+            }
         }
     }
 }

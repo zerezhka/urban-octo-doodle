@@ -65,6 +65,8 @@ dependencies {
     // Compose
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
+//    implementation(platform(libs.androidx.compose.animation))
+    implementation(libs.androidx.navigation.compose)
 
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
@@ -93,13 +95,18 @@ dependencies {
     implementation(libs.orbit.viewmodel)
     implementation(libs.orbit.compose)
 
-    // Testing
-    testImplementation(libs.junit)
-    testImplementation(libs.orbit.test)
+    //Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     // Coil
     implementation(libs.coil.compose)
     implementation(libs.coil.okhttp)
+
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.orbit.test)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

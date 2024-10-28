@@ -15,7 +15,7 @@ class RemoteDataSource @Inject constructor(val okHttpClient: OkHttpClient): Data
                 .build()
         ).execute().use { response ->
             if (!response.isSuccessful) throw Exception("Unexpected code $response")
-            return Converter.map(response.body!!.string())
+            return Converter.fromNetwork(response.body!!.string())
         }
     }
 

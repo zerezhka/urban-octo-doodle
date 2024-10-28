@@ -1,12 +1,18 @@
 package com.example.githubexplorer.main.di
 
+import android.content.Context
+import androidx.room.Room
 import com.example.githubexplorer.BuildConfig
 import com.example.githubexplorer.main.data.GithubClient
+import com.example.githubexplorer.main.db.GithubExploraDatabase
+import com.example.githubexplorer.main.db.dao.ReposDao
+import com.example.githubexplorer.main.db.dao.UsersDao
 import com.example.githubexplorer.main.ui.MainActivityViewModel
 import com.example.githubexplorer.main.usecase.SearchUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import javax.inject.Singleton
@@ -35,4 +41,31 @@ object MainActivityModule {
         return OkHttpClient.Builder()
             .build()
     }
+
+    // Database
+    @Singleton
+    @Provides
+    fun provideUsersDao(
+        database: GithubExploraDatabase
+    ): UsersDao
+    = database.usersDao()
+
+    @Singleton
+    @Provides
+    fun provideReposDao(
+        database: GithubExploraDatabase
+    ): ReposDao
+    = database.reposDao()
+
+
+    @Singleton
+    @Provides
+    fun provideDatabase(
+        @ApplicationContext
+        context: Context
+    ): GithubExploraDatabase =
+        Room
+            .databaseBuilder(context, GithubExploraDatabase::class.java, "github_explorer.db")
+            .fallbackToDestructiveMigration()
+            .build()
 }
