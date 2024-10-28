@@ -8,6 +8,8 @@ import javax.inject.Inject
 
 class LocalDataSource @Inject constructor(val reposDao: ReposDao, val usersDao: UsersDao) : DataSource {
     override suspend fun search(query: String): List<GithubUser> {
+        return emptyList()
+
         //todo get from local db
         return listOf(
             // https://github.com/zerezhka?tab=repositories

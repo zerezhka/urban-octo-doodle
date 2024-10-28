@@ -6,6 +6,8 @@ plugins {
 
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    kotlin("plugin.serialization") version "2.0.21" apply true
+
 }
 
 android {
@@ -22,12 +24,15 @@ android {
         val githubProperties = org.jetbrains.kotlin.konan.properties.Properties()
         githubProperties.load(keystoreFile.inputStream())
 
-        val clientId: String = System.getenv("GITHUB_CLIENT_ID")
-            ?: githubProperties["github.properties.clentId"].toString()
-        val appId: String =
-            System.getenv("GITHUB_APP_ID") ?: githubProperties["github.properties.appId"].toString()
-        buildConfigField("String", "GITHUB_CLIENT_ID", "\"${clientId}\"")
-        buildConfigField("int", "GITHUB_APP_ID", appId)
+//        val clientId: String = System.getenv("GITHUB_CLIENT_ID")
+//            ?: githubProperties["github.properties.clentId"].toString()
+        val token: String = System.getenv("GITHUB_TOKEN")
+            ?: githubProperties["github.properties.token"].toString()
+//        val appId: String =
+//            System.getenv("GITHUB_APP_ID") ?: githubProperties["github.properties.appId"].toString()
+//        buildConfigField("String", "GITHUB_CLIENT_ID", "\"${clientId}\"")
+//        buildConfigField("int", "GITHUB_APP_ID", appId)
+        buildConfigField("String", "GITHUB_TOKEN", "\"${token}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -89,6 +94,12 @@ dependencies {
     // OkHttp
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+
+    //retrofit
+    implementation(libs.retrofit)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.converter.kotlinx.serialization)
+
 
     // OrbitMvi
     implementation(libs.orbit.core)

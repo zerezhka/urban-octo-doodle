@@ -2,24 +2,14 @@ package com.example.githubexplorer.main.repository
 
 import com.example.githubexplorer.main.data.GithubRepository
 import com.example.githubexplorer.main.data.GithubUser
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import com.example.githubexplorer.network.GitHubService
 import javax.inject.Inject
 
-class RemoteDataSource @Inject constructor(val okHttpClient: OkHttpClient): DataSource {
-    override suspend fun search(query: String): List<GithubUser> {
-        okHttpClient.newCall(
-            Request.Builder()
-                .url("https://api.github.com/search/users?q=$query")
-                .method("GET", null)
-                .build()
-        ).execute().use { response ->
-            if (!response.isSuccessful) throw Exception("Unexpected code $response")
-            return Converter.fromNetwork(response.body!!.string())
-        }
-    }
+class RemoteDataSource @Inject constructor(val retrofit: GitHubService) : DataSource {
+    override suspend fun search(query: String): List<GithubUser> =
+        retrofit.listUsers(query).items
 
-    override suspend fun getRepositories(user: String): List<GithubRepository> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getRepositories(user: String): List<GithubRepository> =
+        retrofit.listRepos(user).items
+
 }

@@ -6,5 +6,7 @@ plugins {
     alias (libs.plugins.ksp) apply false
     alias (libs.plugins.hilt) apply false
     alias (libs.plugins.kotlin.parcelize) apply false
+    kotlin("plugin.serialization") version "2.0.21" apply false
+
 }
 val platform by extra("android")

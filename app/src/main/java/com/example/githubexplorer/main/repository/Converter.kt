@@ -4,12 +4,11 @@ import com.example.githubexplorer.main.data.GithubRepository
 import com.example.githubexplorer.main.data.GithubUser
 import com.example.githubexplorer.main.db.model.GithubRepoDB
 import com.example.githubexplorer.main.db.model.GithubUserDB
-import timber.log.Timber
+import okhttp3.Response
 
 object Converter {
-    fun fromNetwork(string: String): List<GithubUser> {
-        Timber.d("RESPONSE: %s", string)
-        Timber.d("WARNING:!!! NOT MAPPING YET!!!")
+    fun fromNetwork(response: Response): List<GithubUser> {
+        //TODO: Implement this
         return emptyList()
     }
 
