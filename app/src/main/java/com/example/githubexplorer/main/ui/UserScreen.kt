@@ -24,28 +24,29 @@ import timber.log.Timber
 
 @Composable
 fun UserScreen(
-    user: GithubUser,
+    users: List<GithubUser>,
     clicker: () -> Unit,
     placeHolder: Painter?,
     innerPadding: PaddingValues,
     imageLoader: ImageLoader?,
 ) {
     Column(
-//        verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .padding(innerPadding)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            LoadingImageFromInternetCoil(
-                model = user.avatar,
-                contentDescription = "${user.name} avatar",
-                placeholder = placeHolder,
-                imageLoader = imageLoader,
-            )
+        users.forEach{ user ->
+            Row(modifier = Modifier.fillMaxWidth()) {
+                LoadingImageFromInternetCoil(
+                    model = user.avatar,
+                    contentDescription = "${user.name} avatar",
+                    placeholder = placeHolder,
+                    imageLoader = imageLoader,
+                )
+                Text(user.name, modifier = Modifier.padding(16.dp))
+            }
         }
-        Text(user.name)
         Button(
             onClick = clicker,
             modifier = Modifier
@@ -111,18 +112,19 @@ fun LoadingScreen(onClick: () -> Unit) {
 @Composable
 fun PreviewUserScreen() {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPaddings ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPaddings)
-        ) {
             UserScreen(
-                GithubUser("username", "avatar_url"),
+                listOf(
+                    GithubUser("username", "avatar_url"),
+                    GithubUser("username", "avatar_url"),
+                    GithubUser("username", "avatar_url"),
+                    GithubUser("username", "avatar_url"),
+                    GithubUser("username", "avatar_url"),
+                    GithubUser("username", "avatar_url"),
+                ),
                 { },
                 painterResource(id = com.example.githubexplorer.R.drawable.ic_launcher_background),
                 innerPaddings,
                 null
             )
-        }
     }
 }
