@@ -18,6 +18,12 @@ interface GitHubService {
     @GET("users/{user}/repos")
     suspend fun listRepos(@Path("user") user: String): GithubResponse<GithubRepository>
 
+
+    @Headers(
+        "Accept: application/vnd.github.v3+json",
+        "Authorization: ${BuildConfig.GITHUB_TOKEN}",
+        "X-GitHub-Api-Version: 2022-11-28"
+    )
     @GET("search/users")
     suspend fun listUsers(@Query("q")query: String): GithubResponse<GithubUser>
 }

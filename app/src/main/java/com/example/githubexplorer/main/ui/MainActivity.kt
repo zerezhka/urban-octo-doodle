@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
 
         viewModel.viewModelScope.launch{
             withContext(Dispatchers.IO) {
-                viewModel.search("zerezhka")// initial search
+                viewModel.search("rexim")// initial search
             }
         }
         setContent {
