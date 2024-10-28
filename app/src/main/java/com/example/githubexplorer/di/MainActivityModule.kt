@@ -2,6 +2,9 @@ package com.example.githubexplorer.di
 
 import android.content.Context
 import androidx.room.Room
+import coil3.ImageLoader
+import coil3.request.CachePolicy
+import coil3.util.Logger
 import com.example.githubexplorer.BuildConfig
 import com.example.githubexplorer.main.data.GithubClient
 import com.example.githubexplorer.main.db.GithubExploraDatabase
@@ -16,6 +19,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
+import timber.log.Timber
 import javax.inject.Singleton
 
 @Module
@@ -33,7 +37,10 @@ object MainActivityModule {
     @Singleton
     @Provides
     fun provideGithubClient(): GithubClient {
-        return GithubClient(clientId = BuildConfig.GITHUB_CLIENT_ID, appId = BuildConfig.GITHUB_APP_ID)
+        return GithubClient(
+            clientId = BuildConfig.GITHUB_CLIENT_ID,
+            appId = BuildConfig.GITHUB_APP_ID
+        )
     }
 
     @Singleton
@@ -49,15 +56,13 @@ object MainActivityModule {
     @Provides
     fun provideUsersDao(
         database: GithubExploraDatabase
-    ): UsersDao
-    = database.usersDao()
+    ): UsersDao = database.usersDao()
 
     @Singleton
     @Provides
     fun provideReposDao(
         database: GithubExploraDatabase
-    ): ReposDao
-    = database.reposDao()
+    ): ReposDao = database.reposDao()
 
 
     @Singleton
@@ -70,4 +75,33 @@ object MainActivityModule {
             .databaseBuilder(context, GithubExploraDatabase::class.java, "github_explorer.db")
             .fallbackToDestructiveMigration()
             .build()
+
+    @Singleton
+    @Provides
+    fun provideImageLoader(
+        @ApplicationContext
+        context: Context,
+    ): ImageLoader {
+        val debugLogger = object : Logger {
+            override var minLevel: Logger.Level = Logger.Level.Info
+
+            override fun log(
+                tag: String,
+                level: Logger.Level,
+                message: String?,
+                throwable: Throwable?
+            ) {
+                if (throwable == null)
+                    Timber.d("$tag $level $message ")
+                else
+                    Timber.e(throwable)
+            }
+
+        }
+        return ImageLoader.Builder(context)
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .logger(debugLogger)
+            .build()
+    }
 }
