@@ -7,7 +7,10 @@ sealed class NavigationC {
     @Serializable
     object UserFinder: NavigationC()
     @Serializable
-    data class ReposList(val userName: String) : NavigationC()
+    object ReposList : NavigationC(){
+        val route = "repos"
+    }
+//    object ReposList: NavigationC()
     @Serializable
     object DownloadScreen : NavigationC()
 }

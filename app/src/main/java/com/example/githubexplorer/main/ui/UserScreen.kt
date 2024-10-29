@@ -11,41 +11,40 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults.InputField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
-import com.example.githubexplorer.R
 import com.example.githubexplorer.main.data.GithubUser
+import timber.log.Timber
 
 @SuppressLint("StateFlowValueCalledInComposition")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserScreen(
-    users: List<GithubUser>,
-    queryText: String,
-    search: () -> Unit,
-    onQueryChange: (query:String) -> Unit,
+    viewModel: MainActivityViewModel = hiltViewModel(),
     placeHolder: Painter?,
     imageLoader: ImageLoader?,
-    onUserClick: ((GithubUser) -> Unit) = {}
+    onNavigate: ((GithubUser) -> Unit) = {},
+    modifier: Modifier = Modifier
 ) {
+
+    val searchResultUsers = viewModel.searchResult.collectAsState()
+    val query = viewModel.query.collectAsState()
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()),
+        modifier = modifier.verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         var expanded = remember { false }
@@ -54,15 +53,20 @@ fun UserScreen(
                 InputField(
                     onSearch = {
                         expanded = false
-                        search.invoke()
+                        viewModel.search(it)
                     },
                     expanded = expanded,
-                    query = queryText,
-                    onQueryChange = onQueryChange,
+                    query = query.value,
+                    onQueryChange = { viewModel.query.value = it },
                     onExpandedChange = { expanded = it },
                     placeholder = { Text("Search") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    trailingIcon = { Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.clickable { onQueryChange("") }) },
+                    trailingIcon = {
+                        Icon(
+                            Icons.Default.Clear,
+                            contentDescription = null,
+                            modifier = Modifier.clickable { viewModel.query.value = "" })
+                    },
                 )
             },
             expanded = expanded,
@@ -78,13 +82,13 @@ fun UserScreen(
                 modifier = Modifier.clickable(
                     onClick = {
                         expanded = false
-                        onQueryChange("zerezhka")
+                        viewModel.query.value = "zerezhka"
                     }
                 )
             )
         }
-        users.forEach { user ->
-                UserRow(user, placeHolder, imageLoader, onUserClick)
+        searchResultUsers.value.forEach { user ->
+            UserRow(user, placeHolder, imageLoader, onNavigate)
         }
     }
 }
@@ -96,7 +100,14 @@ fun UserRow(
     imageLoader: ImageLoader?,
     onUserClick: (GithubUser) -> Unit
 ) {
-    Row(modifier = Modifier.fillMaxWidth().clickable(onClick = { onUserClick(user) })) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .clickable(onClick = {
+            Timber.d("UserRow: $user")
+            onUserClick(user)
+        })
+    ) {
+        Timber.d("UserRow: $user")
         LoadingImageFromInternetCoil(
             model = user.avatar,
             contentDescription = "${user.name} avatar",
@@ -136,30 +147,18 @@ fun LoadingImageFromInternetCoil(
         )
     }
 }
+/*
 
 @Preview(showBackground = true, showSystemUi = true, device = Devices.PIXEL_6A)
 @Composable
 fun PreviewUserScreen() {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPaddings ->
         UserScreen(
-            listOf(
-                GithubUser("username", "avatar_url"),
-                GithubUser("username", "avatar_url"),
-                GithubUser("username", "avatar_url"),
-                GithubUser("username", "avatar_url"),
-                GithubUser("username", "avatar_url"),
-                GithubUser("username", "avatar_url"),
-            ),
-//            { },
-            queryText = "query",
-            search = {
-                //presenter.search(it)
-            },
-            onQueryChange = { },
-            painterResource(id = R.drawable.ic_launcher_background),
-            onUserClick ={ },
+            viewModel = hiltViewModel(),
+            onNavigate = { },
             imageLoader = null,
-//            modifier = Modifier.padding(innerPaddings).padding(innerPaddings).padding(innerPaddings).padding(innerPaddings)
+            modifier = Modifier.padding(innerPaddings),
+            placeHolder = painterResource(id = R.drawable.ic_launcher_background)
         )
     }
-}
+}*/
