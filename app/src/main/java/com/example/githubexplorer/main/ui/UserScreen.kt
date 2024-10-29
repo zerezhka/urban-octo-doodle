@@ -30,7 +30,6 @@ import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import com.example.githubexplorer.R
 import com.example.githubexplorer.main.data.GithubUser
-import timber.log.Timber
 
 @SuppressLint("StateFlowValueCalledInComposition")
 
@@ -42,14 +41,11 @@ fun UserScreen(
     search: () -> Unit,
     onQueryChange: (query:String) -> Unit,
     placeHolder: Painter?,
-    innerPadding: PaddingValues,
     imageLoader: ImageLoader?,
+    onUserClick: ((GithubUser) -> Unit) = {}
 ) {
     Column(
-        modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState()),
+        modifier = Modifier.verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         var expanded = remember { false }
@@ -88,16 +84,26 @@ fun UserScreen(
             )
         }
         users.forEach { user ->
-            Row(modifier = Modifier.fillMaxWidth()) {
-                LoadingImageFromInternetCoil(
-                    model = user.avatar,
-                    contentDescription = "${user.name} avatar",
-                    placeholder = placeHolder,
-                    imageLoader = imageLoader,
-                )
-                Text(user.name, modifier = Modifier.padding(16.dp))
-            }
+                UserRow(user, placeHolder, imageLoader, onUserClick)
         }
+    }
+}
+
+@Composable
+fun UserRow(
+    user: GithubUser,
+    placeholder: Painter?,
+    imageLoader: ImageLoader?,
+    onUserClick: (GithubUser) -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth().clickable(onClick = { onUserClick(user) })) {
+        LoadingImageFromInternetCoil(
+            model = user.avatar,
+            contentDescription = "${user.name} avatar",
+            placeholder = placeholder,
+            imageLoader = imageLoader,
+        )
+        Text(user.name, modifier = Modifier.padding(16.dp))
     }
 }
 
@@ -108,15 +114,13 @@ fun LoadingImageFromInternetCoil(
     placeholder: Painter?,
     imageLoader: ImageLoader?,
 ) {
+    val image = remember { model }
     if (imageLoader != null) {
         AsyncImage(
             modifier = Modifier
                 .size(120.dp)
                 .clip(RoundedCornerShape(24.dp)),
-            model = remember {
-                Timber.d("Loading: $model")
-                model
-            },
+            model = image,
             contentDescription = contentDescription,
             placeholder = remember { placeholder },
             imageLoader = imageLoader,
@@ -126,9 +130,7 @@ fun LoadingImageFromInternetCoil(
             modifier = Modifier
                 .size(120.dp)
                 .clip(RoundedCornerShape(24.dp)),
-            model = remember {
-                model
-            },
+            model = image,
             contentDescription = contentDescription,
             placeholder = remember { placeholder },
         )
@@ -155,8 +157,9 @@ fun PreviewUserScreen() {
             },
             onQueryChange = { },
             painterResource(id = R.drawable.ic_launcher_background),
-            innerPaddings,
-            null
+            onUserClick ={ },
+            imageLoader = null,
+//            modifier = Modifier.padding(innerPaddings).padding(innerPaddings).padding(innerPaddings).padding(innerPaddings)
         )
     }
 }
