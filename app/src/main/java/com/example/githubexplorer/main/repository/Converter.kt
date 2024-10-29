@@ -4,12 +4,13 @@ import com.example.githubexplorer.main.data.GithubRepository
 import com.example.githubexplorer.main.data.GithubUser
 import com.example.githubexplorer.main.db.model.GithubRepoDB
 import com.example.githubexplorer.main.db.model.GithubUserDB
-import okhttp3.Response
 
 object Converter {
-    fun fromNetwork(response: Response): List<GithubUser> {
-        //TODO: Implement this
-        return emptyList()
+    fun toDatabase(user: GithubUser): GithubUserDB {
+        return GithubUserDB(
+            user.name,
+            user.avatar
+        )
     }
 
     fun fromDatabase(userDB: GithubUserDB): GithubUser {

@@ -8,17 +8,19 @@ import javax.inject.Inject
 
 class LocalDataSource @Inject constructor(val reposDao: ReposDao, val usersDao: UsersDao) : DataSource {
     override suspend fun search(query: String): List<GithubUser> {
-        return emptyList()
+        return usersDao.getAllContaining(name=query).map {
+            Converter.fromDatabase(it)
+        }
 
         //todo get from local db
-        return listOf(
-            // https://github.com/zerezhka?tab=repositories
-            //download url = https://github.com/zerezhka/good_training_language/archive/refs/heads/main.zip
-            GithubUser("zerezhka", "https://avatars.githubusercontent.com/u/10316435?v=4"),
-
-            // it's org btw (https://github.com/orgs/tsoding/repositories?type=all)
-            GithubUser("tsoding", "https://avatars.githubusercontent.com/u/18597647?v=4")
-        )
+//        return listOf(
+//            // https://github.com/zerezhka?tab=repositories
+//            //download url = https://github.com/zerezhka/good_training_language/archive/refs/heads/main.zip
+//            GithubUser("zerezhka", "https://avatars.githubusercontent.com/u/10316435?v=4"),
+//
+//            // it's org btw (https://github.com/orgs/tsoding/repositories?type=all)
+//            GithubUser("tsoding", "https://avatars.githubusercontent.com/u/18597647?v=4")
+//        )
     }
 
     override suspend fun getRepositories(user: String): List<GithubRepository> {
