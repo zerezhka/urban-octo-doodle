@@ -50,12 +50,12 @@ class MainActivity : ComponentActivity() {
                                 imageLoader = imageLoader,
                                 onNavigate = { user ->
                                     Timber.d("User clicked: $user")
-                                    navController.navigate("${NavigationC.ReposList.route}/{${user.name}}/{${user.avatar}}")
+                                    navController.navigate("${NavigationC.ReposList.route}/${user.name}/${user.avatar.replace("/", "%2F")}")
                                 },
                             )
                         }
                         composable(
-                            route = "repos/{name}/{avatar}",
+                            route = "${NavigationC.ReposList.route}/{name}/{avatar}",
                             arguments = listOf(
                                 navArgument("name") { type = NavType.StringType },
                                 navArgument("avatar") { type = NavType.StringType },
@@ -68,10 +68,10 @@ class MainActivity : ComponentActivity() {
                             Timber.d("$$$$$$$$$$$$$$$$$$$$$$$$")
                             val arguments = requireNotNull(backStackEntry.arguments)
                             val name = arguments.getString("name")
-                            //todo use this avatar to load image
-                            val avatar = arguments.getString("avatar")
+                            val avatar = arguments.getString("avatar")?.replace("%2F","\\/", )
 
-                            Text("ReposList for $name not implemented yet")
+                            Text("ReposList for $name not implemented yet\n $avatar")
+//                        Text("ReposList not implemented yet")
                         }
                         composable<NavigationC.DownloadScreen> { Text("DownloadScreen not implemented yet") }
                         // Add more destinations similarly.
