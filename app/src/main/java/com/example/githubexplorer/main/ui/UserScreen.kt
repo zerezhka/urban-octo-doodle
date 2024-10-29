@@ -58,7 +58,6 @@ fun UserScreen(
                 InputField(
                     onSearch = {
                         expanded = false
-//                        onQueryChange("")//?
                         search.invoke()
                     },
                     expanded = expanded,
@@ -67,7 +66,7 @@ fun UserScreen(
                     onExpandedChange = { expanded = it },
                     placeholder = { Text("Search") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    trailingIcon = { Icon(Icons.Default.Clear, contentDescription = null) },
+                    trailingIcon = { Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.clickable { onQueryChange("") }) },
                 )
             },
             expanded = expanded,
@@ -82,9 +81,8 @@ fun UserScreen(
                 "zerezhka", color = Color(20, 20, 255, 255),
                 modifier = Modifier.clickable(
                     onClick = {
-//                        expanded = false
+                        expanded = false
                         onQueryChange("zerezhka")
-//                        search.invoke()
                     }
                 )
             )
