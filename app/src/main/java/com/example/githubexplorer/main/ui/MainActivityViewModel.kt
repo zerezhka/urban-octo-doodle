@@ -1,7 +1,6 @@
 package com.example.githubexplorer.main.ui
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,15 +25,14 @@ class MainActivityViewModel @Inject constructor(val useCase: SearchUseCase) : Vi
     private val _isSearching = MutableStateFlow(false)
     val isSearching = _isSearching.asStateFlow()
 
-    @Stable
     var query: MutableStateFlow<String> = MutableStateFlow("")
 
-    private var request : Job? = null
+    private var request: Job? = null
 
     fun search(query: String) {
         request?.cancel()
         request = viewModelScope.launch {
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.IO) {
                 isLoading.value = true
                 val result = async { useCase.search(query) }
                 searchResult.emit(result.await())

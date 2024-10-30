@@ -15,17 +15,17 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults.InputField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.example.githubexplorer.main.data.GithubUser
 import timber.log.Timber
 
@@ -33,16 +33,19 @@ import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserScreen(
-    viewModel: MainActivityViewModel = hiltViewModel(),
+fun SearchUserScreen(
+    query: String,
+    searchResultUsers: List<GithubUser>,
     placeHolder: Painter?,
     imageLoader: ImageLoader?,
+    onSearch: () -> Unit,
     onNavigate: ((GithubUser) -> Unit) = {},
-    modifier: Modifier = Modifier
+    onQueryChange: (String) -> Unit,
+    onQueryReplace: (String) -> Unit,
+    onClearText: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
 
-    val searchResultUsers = viewModel.searchResult.collectAsState()
-    val query = viewModel.query.collectAsState()
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -53,11 +56,11 @@ fun UserScreen(
                 InputField(
                     onSearch = {
                         expanded = false
-                        viewModel.search(it)
+                        onSearch.invoke()
                     },
                     expanded = expanded,
-                    query = query.value,
-                    onQueryChange = { viewModel.query.value = it },
+                    query = query,
+                    onQueryChange = onQueryChange,
                     onExpandedChange = { expanded = it },
                     placeholder = { Text("Search") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
@@ -65,7 +68,7 @@ fun UserScreen(
                         Icon(
                             Icons.Default.Clear,
                             contentDescription = null,
-                            modifier = Modifier.clickable { viewModel.query.value = "" })
+                            modifier = Modifier.clickable { onClearText.invoke() })
                     },
                 )
             },
@@ -82,12 +85,13 @@ fun UserScreen(
                 modifier = Modifier.clickable(
                     onClick = {
                         expanded = false
-                        viewModel.query.value = "zerezhka"
+                        onQueryReplace.invoke("zerezhka")
+
                     }
                 )
             )
         }
-        searchResultUsers.value.forEach { user ->
+        searchResultUsers.forEach { user ->
             UserRow(user, placeHolder, imageLoader, onNavigate)
         }
     }
@@ -100,16 +104,16 @@ fun UserRow(
     imageLoader: ImageLoader?,
     onUserClick: (GithubUser) -> Unit
 ) {
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .clickable(onClick = {
-            Timber.d("UserRow: $user")
-            onUserClick(user)
-        })
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = {
+                Timber.d("UserRow: $user")
+                onUserClick(user)
+            })
     ) {
-        Timber.d("UserRow: $user")
         LoadingImageFromInternetCoil(
-            model = user.avatar,
+            image = user.avatar,
             contentDescription = "${user.name} avatar",
             placeholder = placeholder,
             imageLoader = imageLoader,
@@ -120,20 +124,21 @@ fun UserRow(
 
 @Composable
 fun LoadingImageFromInternetCoil(
-    model: Any?,
+    image: String?,
     contentDescription: String?,
     placeholder: Painter?,
     imageLoader: ImageLoader?,
 ) {
-    val image = remember { model }
     if (imageLoader != null) {
         AsyncImage(
             modifier = Modifier
                 .size(120.dp)
                 .clip(RoundedCornerShape(24.dp)),
-            model = image,
+            model = ImageRequest.Builder(context = LocalContext.current)
+                .data(image)
+                .build(),
             contentDescription = contentDescription,
-            placeholder = remember { placeholder },
+            placeholder = placeholder,
             imageLoader = imageLoader,
         )
     } else {
@@ -141,15 +146,16 @@ fun LoadingImageFromInternetCoil(
             modifier = Modifier
                 .size(120.dp)
                 .clip(RoundedCornerShape(24.dp)),
-            model = image,
+            model = ImageRequest.Builder(context = LocalContext.current)
+                .data(image)
+                .build(),
             contentDescription = contentDescription,
-            placeholder = remember { placeholder },
+            placeholder = placeholder,
         )
     }
 }
-/*
 
-@Preview(showBackground = true, showSystemUi = true, device = Devices.PIXEL_6A)
+/*@Preview(showBackground = true, showSystemUi = true, device = Devices.PIXEL_6A)
 @Composable
 fun PreviewUserScreen() {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPaddings ->
@@ -158,7 +164,9 @@ fun PreviewUserScreen() {
             onNavigate = { },
             imageLoader = null,
             modifier = Modifier.padding(innerPaddings),
-            placeHolder = painterResource(id = R.drawable.ic_launcher_background)
+            placeHolder = painterResource(id = R.drawable.ic_launcher_foreground)
         )
     }
 }*/
+
+// LinearProgressIndicator
