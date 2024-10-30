@@ -8,7 +8,14 @@ open class SearchRepository @Inject constructor(
     val remoteDataSource: RemoteDataSource
 ) {
     suspend fun search(query: String): List<GithubUser> {
-        return localDataSource.search(query).ifEmpty { remoteDataSource.search(query)
-            .also { localDataSource.usersDao.insertAll(it.map { Converter.toDatabase(it) }) }  }
+        return localDataSource.search(query)
+            .ifEmpty {
+                remoteDataSource.search(query)
+                    .also { localDataSource.usersDao.insertAll(it.map { Converter.toDatabase(it) }) }
+            }.also {
+                remoteDataSource.search(query)
+                    .also { localDataSource.usersDao.insertAll(it.map { Converter.toDatabase(it) }) }
+            }
     }
+
 }
