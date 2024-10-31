@@ -3,7 +3,7 @@ package com.example.githubexplorer.network
 import com.example.githubexplorer.BuildConfig
 import com.example.githubexplorer.main.data.GithubUser
 import com.example.githubexplorer.network.model.GithubRepositoryNetwork
-import com.example.githubexplorer.network.model.GithubResponse
+import com.example.githubexplorer.network.model.GithubUserResponse
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Path
@@ -25,5 +25,5 @@ interface GitHubService {
         "X-GitHub-Api-Version: 2022-11-28"
     )
     @GET("search/users")
-    suspend fun listUsers(@Query("q")query: String): GithubResponse<GithubUser>
+    suspend fun listUsers(@Query("q")query: String): GithubUserResponse<GithubUser>
 }
