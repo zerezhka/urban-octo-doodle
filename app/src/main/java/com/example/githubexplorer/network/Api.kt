@@ -1,8 +1,8 @@
 package com.example.githubexplorer.network
 
 import com.example.githubexplorer.BuildConfig
-import com.example.githubexplorer.main.data.GithubRepository
 import com.example.githubexplorer.main.data.GithubUser
+import com.example.githubexplorer.network.model.GithubRepositoryNetwork
 import com.example.githubexplorer.network.model.GithubResponse
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -16,7 +16,7 @@ interface GitHubService {
         "X-GitHub-Api-Version: 2022-11-28"
     )
     @GET("users/{user}/repos")
-    suspend fun listRepos(@Path("user") user: String): GithubResponse<GithubRepository>
+    suspend fun listRepos(@Path("user") user: String): List<GithubRepositoryNetwork>
 
 
     @Headers(

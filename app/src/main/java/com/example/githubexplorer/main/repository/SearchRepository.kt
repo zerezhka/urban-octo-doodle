@@ -11,10 +11,10 @@ open class SearchRepository @Inject constructor(
         return localDataSource.search(query)
             .ifEmpty {
                 remoteDataSource.search(query)
-                    .also { localDataSource.usersDao.insertAll(it.map { Converter.toDatabase(it) }) }
+                    .also { localDataSource.save(it) }
             }.also {
                 remoteDataSource.search(query)
-                    .also { localDataSource.usersDao.insertAll(it.map { Converter.toDatabase(it) }) }
+                    .also { localDataSource.save(it) }
             }
     }
 

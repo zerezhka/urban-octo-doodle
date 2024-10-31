@@ -9,6 +9,8 @@ import com.example.githubexplorer.main.db.GithubExploraDatabase
 import com.example.githubexplorer.main.db.dao.ReposDao
 import com.example.githubexplorer.main.db.dao.UsersDao
 import com.example.githubexplorer.main.ui.MainActivityViewModel
+import com.example.githubexplorer.main.ui.ReposViewModel
+import com.example.githubexplorer.main.usecase.ReposUseCase
 import com.example.githubexplorer.main.usecase.SearchUseCase
 import com.example.githubexplorer.network.GitHubService
 import com.example.githubexplorer.network.TimberLoggingInterceptor
@@ -37,6 +39,11 @@ object MainActivityModule {
         return MainActivityViewModel(usecase)
     }
 
+    @Provides
+    fun provideReposScreenViewModel(usecase: ReposUseCase): ReposViewModel {
+        return ReposViewModel(usecase)
+    }
+
     @Singleton
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
@@ -57,7 +64,6 @@ object MainActivityModule {
     fun provideReposDao(
         database: GithubExploraDatabase
     ): ReposDao = database.reposDao()
-
 
     @Singleton
     @Provides
@@ -101,7 +107,6 @@ object MainActivityModule {
 
     @Provides
     fun provideRetrofit(okHttpClient: OkHttpClient, json: Json): GitHubService {
-
         val retrofit = Retrofit.Builder()
             .baseUrl("https://api.github.com/")
             .client(okHttpClient)
@@ -113,6 +118,7 @@ object MainActivityModule {
             .build()
         return retrofit.create(GitHubService::class.java)
     }
+
     @Provides
     fun provideJson(): Json {
         return Json {

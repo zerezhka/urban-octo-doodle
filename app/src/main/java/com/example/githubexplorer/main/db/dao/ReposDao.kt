@@ -10,6 +10,6 @@ import com.example.githubexplorer.main.db.model.GithubRepoDB
  */
 @Dao
 abstract class ReposDao: BaseDao<GithubRepoDB> {
-    @Query("SELECT * FROM repos")
-    abstract fun getRepos(): List<GithubRepoDB>
+    @Query("SELECT * FROM repos WHERE name = :user")
+    abstract fun getReposByUser(user: String): List<GithubRepoDB>
 }

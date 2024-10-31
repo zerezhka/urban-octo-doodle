@@ -6,8 +6,8 @@ plugins {
 
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    kotlin("plugin.serialization") version "2.0.21" apply true
-
+    alias(libs.plugins.room)
+    alias(libs.plugins.serialization)
 }
 
 android {
@@ -24,14 +24,8 @@ android {
         val githubProperties = org.jetbrains.kotlin.konan.properties.Properties()
         githubProperties.load(keystoreFile.inputStream())
 
-//        val clientId: String = System.getenv("GITHUB_CLIENT_ID")
-//            ?: githubProperties["github.properties.clentId"].toString()
         val token: String = System.getenv("GITHUB_TOKEN")
             ?: githubProperties["github.properties.token"].toString()
-//        val appId: String =
-//            System.getenv("GITHUB_APP_ID") ?: githubProperties["github.properties.appId"].toString()
-//        buildConfigField("String", "GITHUB_CLIENT_ID", "\"${clientId}\"")
-//        buildConfigField("int", "GITHUB_APP_ID", appId)
         buildConfigField("String", "GITHUB_TOKEN", "\"${token}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -127,4 +121,8 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }

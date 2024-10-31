@@ -1,6 +1,7 @@
 package com.example.githubexplorer.main.ui
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -64,7 +65,9 @@ class MainActivity : ComponentActivity() {
                             val name = arguments.getString("name")
                             val avatar = arguments.getString("avatar")?.replace("%2F", "\\/")
 
-                            Text("ReposList for $name not implemented yet\n $avatar")
+                            CreateReposScreen(
+                                name = name!!, avatar = avatar,
+                            )
                         }
                         composable<NavigationC.DownloadScreen> { Text("DownloadScreen not implemented yet") }
                         // Add more destinations similarly.
@@ -85,7 +88,8 @@ class MainActivity : ComponentActivity() {
             placeHolder = null,
             imageLoader = imageLoader,
             onSearch = { viewModel.search(query.value) },
-            onNavigate = { user -> navController.navigate(
+            onNavigate = { user ->
+                navController.navigate(
                     "${NavigationC.ReposList.route}/${user.name}/${
                         user.avatar.replace(
                             "/",
@@ -100,6 +104,23 @@ class MainActivity : ComponentActivity() {
                 viewModel.search(it)
             },
             onClearText = { viewModel.query.value = "" },
+        )
+    }
+
+    @Composable
+    fun CreateReposScreen(
+        name: String,
+        avatar: String?,
+    ) {
+        val viewModel = hiltViewModel<ReposViewModel>()
+        viewModel.userRepos(name!!)
+        val repos = viewModel.repos.collectAsState()
+        ReposListScreen(
+            name = name,
+            avatar = avatar,
+            imageLoader = imageLoader,
+            repos = repos.value,
+            onRepoClick = { Toast.makeText(this, "Repo $it clicked", Toast.LENGTH_SHORT).show() }
         )
     }
 }
