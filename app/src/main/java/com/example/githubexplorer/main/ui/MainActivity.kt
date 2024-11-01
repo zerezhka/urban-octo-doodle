@@ -1,8 +1,7 @@
 package com.example.githubexplorer.main.ui
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -73,7 +72,7 @@ class MainActivity : ComponentActivity() {
                                 name = name!!, avatar = avatar, imageLoader = imageLoader,
                                 onDownloadClick = { repo ->
                                     fileDownloader.download(
-                                        // it responds with a new url to download the file, todo move everything to the viewmodel and retrofit @Streaming api
+                                        // it responds with a new url to download the file, todo move everything to the viewmodel and (?retrofit @Streaming api?)
                                         // todo add a progress bar
                                         // NOT WORKING
                                         url = "https://api.github.com/repos/${repo.owner}/${repo.name}/zipball",
@@ -82,18 +81,12 @@ class MainActivity : ComponentActivity() {
                                             "Accept" to "application/vnd.github.v3+json",
                                             "X-GitHub-Api-Version" to "2022-11-28"),
 
-                                        path = ".",
+                                        path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path,
                                         fileName = repo.name,
                                         tag = repo.url,
                                     )
 
                                     Toast.makeText(context, "Downloading ${repo.name}", Toast.LENGTH_SHORT).show()
-                                    // todo remove
-                                    // draft open browser, just to have at least download functionality
-                                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://api.github.com/repos/${repo.owner}/${repo.name}/zipball"))
-                                    context.startActivity(intent)
-                                    // todo remove
-                                    fileDownloader.cancel(repo.url)
                                 },
                             )
                         }
