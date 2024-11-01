@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -36,15 +37,17 @@ fun DownloadsScreen() {
 fun ShowDownloadsScreen() {
     val viewModel = hiltViewModel<DownloadsViewModel>()
     viewModel.getKetchDownloads()
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
         val downloads = viewModel.downloads.collectAsState()
         downloads.value.forEach {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                ) {
+            ) {
                 Text("Download: ${it.url}")
                 Text("status: ${it.status}")
                 if (it.status == Status.FAILED) {
@@ -64,8 +67,10 @@ fun requestPostNotificationPermission(hasPermission: MutableState<Boolean>) {
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { hasPermission.value = it }
     )
-    // throws launcher has not been initialized
-//    requestPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    LaunchedEffect("requestPermission") {
+        // throws launcher has not been initialized, if not wrapped in LaunchedEffect
+        requestPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
     if (!hasPermission.value) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
