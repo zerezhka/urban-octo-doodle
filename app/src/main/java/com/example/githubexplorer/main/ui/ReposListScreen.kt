@@ -5,13 +5,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -90,21 +93,22 @@ fun RepoItem(
             .padding(16.dp, 8.dp)
             .fillMaxSize()
     ) {
-        Row {
-            Text(repo.name, fontSize = 20.sp)
+        Row (modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)) {
+            Text(repo.name, fontSize = 20.sp, modifier = Modifier.align(Alignment.CenterVertically).weight(4f))
             IconButton(onClick = {
                 onDownloadClick.invoke(repo)
-            }) {
+            }, modifier = Modifier.align(Alignment.CenterVertically).weight(1f)) {
                 MyIcons.DownloadIcon()
             }
         }
         Text(
             repo.url,
-            fontSize = 18.sp,
+            fontSize = 16.sp,
             color = androidx.compose.ui.graphics.Color.Blue,
             modifier = Modifier
                 .padding(0.dp, 8.dp)
                 .clickable(onClick = { onRepoClick.invoke(repo) })
         )
+        HorizontalDivider(modifier = Modifier.fillMaxSize())
     }
 }
