@@ -8,7 +8,7 @@ import com.example.githubexplorer.main.db.dao.UsersDao
 import com.example.githubexplorer.main.db.model.GithubRepoDB
 import com.example.githubexplorer.main.db.model.GithubUserDB
 
-private const val DATABASE_VERSION = 2
+private const val DATABASE_VERSION = 3
 
 /**
  * The [RoomDatabase] we use in this app.

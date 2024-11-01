@@ -110,6 +110,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.okhttp)
 
+    //Ketch(downloader)
+    implementation(libs.khushpanchal.ketch)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.orbit.test)

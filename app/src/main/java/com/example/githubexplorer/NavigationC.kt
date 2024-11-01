@@ -8,7 +8,7 @@ sealed class NavigationC {
     object UserFinder: NavigationC()
     @Serializable
     object ReposList : NavigationC(){
-        const val route = "repos"
+        const val ROUTE = "repos"
     }
 //    object ReposList: NavigationC()
     @Serializable

@@ -14,6 +14,8 @@ import com.example.githubexplorer.main.usecase.ReposUseCase
 import com.example.githubexplorer.main.usecase.SearchUseCase
 import com.example.githubexplorer.network.GitHubService
 import com.example.githubexplorer.network.TimberLoggingInterceptor
+import com.ketch.Ketch
+import com.ketch.NotificationConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -124,5 +126,17 @@ object MainActivityModule {
         return Json {
             ignoreUnknownKeys = true
         }
+    }
+
+    @Provides
+    fun provideKetch(@ApplicationContext applicationContext: Context, okHttpClient: OkHttpClient): Ketch {
+        return Ketch.builder()
+            .setNotificationConfig(
+                NotificationConfig(
+                    enabled = true, smallIcon = android.R.drawable.stat_sys_download
+                )
+            )
+            .setOkHttpClient(okHttpClient)
+            .build(applicationContext)
     }
 }

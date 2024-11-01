@@ -25,10 +25,13 @@ data class GithubRepoDB(
     val name: String,
     @ColumnInfo(name = "owner")
     val owner: String,
-    @ColumnInfo(name = "isDownload", defaultValue = "false")
+    @ColumnInfo(name = "isDownloaded", defaultValue = "false")
     val isDownload: Boolean,
+    // for open file in filesystem
     @ColumnInfo(name = "downloadedUri", defaultValue = "")
     val downloadedUri: String,
+    @ColumnInfo(name = "downloadUrl", defaultValue = "")
+    val downloadUrl: String,
 
     @PrimaryKey val id: String = "$owner/$name"
 )

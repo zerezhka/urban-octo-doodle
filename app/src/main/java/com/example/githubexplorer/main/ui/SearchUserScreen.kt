@@ -1,6 +1,5 @@
 package com.example.githubexplorer.main.ui
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,10 +10,12 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults.InputField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,23 +24,61 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.example.githubexplorer.NavigationC
 import com.example.githubexplorer.main.data.GithubUser
+import com.example.githubexplorer.main.ui.compose.MyIcons
 import timber.log.Timber
 
-@SuppressLint("StateFlowValueCalledInComposition")
+
+@Composable
+fun CreateSearchScreen(navController: NavController, imageLoader: ImageLoader) {
+    val viewModel = hiltViewModel<MainActivityViewModel>()
+    val searchResultUsers = viewModel.searchResult.collectAsState()
+    val query = viewModel.query.collectAsState()
+    SearchUserScreen(
+        query = query.value,
+        searchResultUsers = searchResultUsers.value,
+        placeHolder = null,
+        imageLoader = imageLoader,
+        onSearch = { viewModel.search(query.value) },
+        onNavigateToUser = { user ->
+            navController.navigate(
+                "${NavigationC.ReposList.ROUTE}/${user.name}/${
+                    //todo don't use avatar in navigation, just take it from db
+                    user.avatar.replace(
+                        "/",
+                        "%2F"
+                    )
+                }"
+            )
+        },
+        onNavigateToDownloads = {
+            navController.navigate(NavigationC.DownloadScreen)
+        },
+        onQueryChange = { viewModel.query.value = it },
+        onQueryReplace = {
+            viewModel.query.value = it
+            viewModel.search(it)
+        },
+        onClearText = { viewModel.query.value = "" },
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchUserScreen(
+private fun SearchUserScreen(
     query: String,
     searchResultUsers: List<GithubUser>,
     placeHolder: Painter?,
     imageLoader: ImageLoader?,
+    onNavigateToUser: ((GithubUser) -> Unit) = {},
+    onNavigateToDownloads: (() -> Unit) = {},
     onSearch: () -> Unit,
-    onNavigate: ((GithubUser) -> Unit) = {},
     onQueryChange: (String) -> Unit,
     onQueryReplace: (String) -> Unit,
     onClearText: () -> Unit,
@@ -51,6 +90,11 @@ fun SearchUserScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         var expanded = remember { false }
+        IconButton(
+            onClick = onNavigateToDownloads, modifier = Modifier.align(Alignment.End),
+        ) {
+            MyIcons.DownloadIcon()
+        }
         SearchBar(
             inputField = {
                 InputField(
@@ -92,13 +136,13 @@ fun SearchUserScreen(
             )
         }
         searchResultUsers.forEach { user ->
-            UserRow(user, placeHolder, imageLoader, onNavigate)
+            UserRow(user, placeHolder, imageLoader, onNavigateToUser)
         }
     }
 }
 
 @Composable
-fun UserRow(
+private fun UserRow(
     user: GithubUser,
     placeholder: Painter?,
     imageLoader: ImageLoader?,
@@ -154,19 +198,3 @@ fun LoadingImageFromInternetCoil(
         )
     }
 }
-
-/*@Preview(showBackground = true, showSystemUi = true, device = Devices.PIXEL_6A)
-@Composable
-fun PreviewUserScreen() {
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPaddings ->
-        UserScreen(
-            viewModel = hiltViewModel(),
-            onNavigate = { },
-            imageLoader = null,
-            modifier = Modifier.padding(innerPaddings),
-            placeHolder = painterResource(id = R.drawable.ic_launcher_foreground)
-        )
-    }
-}*/
-
-// LinearProgressIndicator
