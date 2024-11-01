@@ -26,5 +26,4 @@ class ReposViewModel @Inject constructor(private val reposUseCase: ReposUseCase)
             repos.emit(req.await())
         }
     }
-    fun downloadRepo(repo: GithubRepository) = reposUseCase.downloadRepos(repo)
 }

@@ -20,7 +20,6 @@ object Converter {
         )
     }
 
-    // todo simplify isDownload?
     fun fromDatabase(repoDB: GithubRepoDB): GithubRepository {
         return GithubRepository(
             repoDB.name,
