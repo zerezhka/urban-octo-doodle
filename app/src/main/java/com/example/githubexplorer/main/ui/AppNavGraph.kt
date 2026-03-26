@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.githubexplorer.NavigationC
 import com.example.githubexplorer.downloads.ui.DownloadsScreen
-import com.example.githubexplorer.repos.ui.ReposScreen
+import com.example.githubexplorer.githubrepos.ui.GithubReposScreen
 import com.example.githubexplorer.search.ui.SearchScreen
 
 @Composable
@@ -30,7 +30,7 @@ fun AppNavGraph(
         }
         composable<NavigationC.ReposList> { backStackEntry ->
             val route = backStackEntry.toRoute<NavigationC.ReposList>()
-            ReposScreen(name = route.name, avatar = route.avatar)
+            GithubReposScreen(name = route.name, avatar = route.avatar)
         }
         composable<NavigationC.DownloadScreen> {
             DownloadsScreen()

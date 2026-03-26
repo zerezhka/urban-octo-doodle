@@ -1,4 +1,4 @@
-package com.example.githubexplorer.repos.ui
+package com.example.githubexplorer.githubrepos.ui
 
 import android.os.Environment
 import androidx.lifecycle.ViewModel
@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ReposViewModel @Inject constructor(
+class GithubReposViewModel @Inject constructor(
     private val reposUseCase: ReposUseCase,
     private val ketch: Ketch
 ) : ViewModel() {

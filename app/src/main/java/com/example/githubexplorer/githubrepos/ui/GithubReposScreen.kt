@@ -1,4 +1,4 @@
-package com.example.githubexplorer.repos.ui
+package com.example.githubexplorer.githubrepos.ui
 
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
@@ -49,8 +49,8 @@ import com.ketch.Status
 import java.io.File
 
 @Composable
-fun ReposScreen(name: String, avatar: String?) {
-    val viewModel = hiltViewModel<ReposViewModel>()
+fun GithubReposScreen(name: String, avatar: String?) {
+    val viewModel = hiltViewModel<GithubReposViewModel>()
     viewModel.userRepos(name)
     val repos by viewModel.repos.collectAsState()
     val downloadsByTag by viewModel.downloadsByTag.collectAsState()
