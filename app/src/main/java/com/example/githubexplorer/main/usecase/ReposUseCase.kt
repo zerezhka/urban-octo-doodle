@@ -10,12 +10,8 @@ class ReposUseCase @Inject constructor(
     val remoteDataSource: RemoteDataSource
 ) {
     suspend fun userRepos(user: String): List<GithubRepository> {
-        return localDataSource.getReposByUser(user).ifEmpty {
+        return localDataSource.getRepositories(user).ifEmpty {
             return remoteDataSource.getRepositories(user)
         }
-    }
-// I wanna use just DownloadManager api, no need suspension
-    fun downloadRepos(value: GithubRepository) {
-        return remoteDataSource.downloadRepo(value)
     }
 }

@@ -20,9 +20,4 @@ class RemoteDataSource @Inject constructor(val retrofit: GitHubService) : DataSo
                 stars = it.stars,
             )
         }
-
-    fun downloadRepo(repository: GithubRepository) {
-        // DownloadManagerImpl.download(repository)
-    }
-
 }

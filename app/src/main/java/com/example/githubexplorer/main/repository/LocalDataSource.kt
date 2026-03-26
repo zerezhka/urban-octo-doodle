@@ -22,12 +22,6 @@ class LocalDataSource @Inject constructor(
         }
     }
 
-    suspend fun getReposByUser(string: String): List<GithubRepository> {
-        return reposDao.getReposByUser(string).map {
-            Converter.fromDatabase(it)
-        }
-    }
-
     suspend fun save(users: List<GithubUser>) {
         usersDao.insertAll(users.map { Converter.toDatabase(it) })
     }
