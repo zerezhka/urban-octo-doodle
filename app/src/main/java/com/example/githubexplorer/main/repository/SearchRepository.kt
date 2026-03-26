@@ -9,7 +9,7 @@ class SearchRepository @Inject constructor(
 ) {
     suspend fun search(query: String): List<GithubUser> {
         return localDataSource.search(query).ifEmpty {
-            remoteDataSource.search(query).also { localDataSource.save(it) }
+            remoteDataSource.search(query).also { localDataSource.saveUsers(it) }
         }
     }
 }

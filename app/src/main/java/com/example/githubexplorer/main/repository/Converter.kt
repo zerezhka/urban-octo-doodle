@@ -27,4 +27,14 @@ object Converter {
             owner = repoDB.owner,
         )
     }
+
+    fun toDatabase(repo: GithubRepository): GithubRepoDB {
+        return GithubRepoDB(
+            name = repo.name,
+            owner = repo.owner,
+            isDownload = false,
+            downloadedUri = "",
+            downloadUrl = repo.url,
+        )
+    }
 }

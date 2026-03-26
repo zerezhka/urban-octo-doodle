@@ -22,7 +22,11 @@ class LocalDataSource @Inject constructor(
         }
     }
 
-    suspend fun save(users: List<GithubUser>) {
+    suspend fun saveUsers(users: List<GithubUser>) {
         usersDao.insertAll(users.map { Converter.toDatabase(it) })
+    }
+
+    suspend fun saveRepos(repos: List<GithubRepository>) {
+        reposDao.insertAll(repos.map { Converter.toDatabase(it) })
     }
 }

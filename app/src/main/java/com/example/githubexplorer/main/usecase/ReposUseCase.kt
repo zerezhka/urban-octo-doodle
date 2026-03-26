@@ -6,12 +6,12 @@ import com.example.githubexplorer.main.repository.RemoteDataSource
 import javax.inject.Inject
 
 class ReposUseCase @Inject constructor(
-    val localDataSource: LocalDataSource,
-    val remoteDataSource: RemoteDataSource
+    private val localDataSource: LocalDataSource,
+    private val remoteDataSource: RemoteDataSource
 ) {
     suspend fun userRepos(user: String): List<GithubRepository> {
         return localDataSource.getRepositories(user).ifEmpty {
-            return remoteDataSource.getRepositories(user)
+            remoteDataSource.getRepositories(user).also { localDataSource.saveRepos(it) }
         }
     }
 }
