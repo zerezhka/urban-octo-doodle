@@ -17,7 +17,7 @@ class LocalDataSource @Inject constructor(
     }
 
     override suspend fun getRepositories(user: String): List<GithubRepository> {
-        return reposDao.getReposByUser(user).map {
+        return reposDao.getReposByOwner(user).map {
             Converter.fromDatabase(it)
         }
     }
