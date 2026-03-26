@@ -39,15 +39,14 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.example.githubexplorer.downloads.ui.openDownloadedFile
 import com.example.githubexplorer.main.data.GithubRepository
 import com.example.githubexplorer.main.ui.compose.MyIcons
 import com.ketch.DownloadModel
 import com.ketch.Status
-import java.io.File
 
 @Composable
 fun GithubReposScreen(name: String, avatar: String?) {
@@ -68,17 +67,7 @@ fun GithubReposScreen(name: String, avatar: String?) {
             val intent = Intent(Intent.ACTION_VIEW, it.url.toUri())
             context.startActivity(Intent.createChooser(intent, "Choose browser"))
         },
-        onOpenFile = { download ->
-            val file = File(download.path, download.fileName)
-            if (file.exists()) {
-                val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(uri, "application/zip")
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                context.startActivity(Intent.createChooser(intent, "Open with"))
-            }
-        },
+        onOpenFile = { openDownloadedFile(context, it) },
     )
 }
 

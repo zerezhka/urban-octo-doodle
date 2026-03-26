@@ -1,7 +1,6 @@
 package com.example.githubexplorer.downloads.ui
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,11 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.ketch.DownloadModel
 import com.ketch.Status
-import java.io.File
 
 @Composable
 fun DownloadsScreen() {
@@ -61,17 +58,7 @@ private fun ShowDownloadsContent() {
     val downloads by viewModel.downloads.collectAsState()
     val context = LocalContext.current
 
-    val onOpenFile: (DownloadModel) -> Unit = { download ->
-        val file = File(download.path, download.fileName)
-        if (file.exists()) {
-            val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "application/zip")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            context.startActivity(Intent.createChooser(intent, "Open with"))
-        }
-    }
+    val onOpenFile: (DownloadModel) -> Unit = { openDownloadedFile(context, it) }
 
     if (downloads.isEmpty()) {
         Box(
