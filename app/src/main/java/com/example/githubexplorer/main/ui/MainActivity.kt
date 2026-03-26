@@ -72,9 +72,8 @@ class MainActivity : ComponentActivity() {
                                 name = name!!, avatar = avatar, imageLoader = imageLoader,
                                 onDownloadClick = { repo ->
                                     fileDownloader.download(
-                                        // it responds with a new url to download the file, todo move everything to the viewmodel and (?retrofit @Streaming api?)
+                                        // todo move download logic to the viewmodel
                                         // todo add a progress bar
-                                        // NOT WORKING
                                         url = "https://api.github.com/repos/${repo.owner}/${repo.name}/zipball",
                                         headers = hashMapOf<String, String>(
                                             "Authorization" to BuildConfig.GITHUB_TOKEN,

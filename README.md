@@ -11,5 +11,5 @@ github.properties.token=github_pat_12ACOW....
 see `app/build.gradle.kts` for more details, if you want to change `properties.file` to another, etc
 
 
-Ketch (dowloading files lib) doesn't work properly with "Content-Length":-1, so it's need to be reworked. More info about lib using:
+More info about Ketch (downloading files lib):
 https://www.youtube.com/watch?v=HJUgGHPX1U8
