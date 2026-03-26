@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.githubexplorer.BuildConfig
 import com.example.githubexplorer.main.data.GithubRepository
+import com.example.githubexplorer.main.ui.userFriendlyMessage
 import com.example.githubexplorer.main.usecase.ReposUseCase
 import com.example.githubexplorer.network.GitHubService
 import com.ketch.DownloadModel
 import com.ketch.Ketch
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,9 +45,11 @@ class GithubReposViewModel @Inject constructor(
             _error.value = null
             try {
                 repos.emit(reposUseCase.userRepos(userName))
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.e(e, "Failed to load repos")
-                _error.value = e.message ?: "Failed to load repos"
+                _error.value = userFriendlyMessage(e)
             }
         }
     }

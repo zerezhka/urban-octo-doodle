@@ -3,8 +3,10 @@ package com.example.githubexplorer.search.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.githubexplorer.main.data.GithubUser
+import com.example.githubexplorer.main.ui.userFriendlyMessage
 import com.example.githubexplorer.main.usecase.SearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,9 +36,11 @@ class SearchViewModel @Inject constructor(private val useCase: SearchUseCase) : 
             _error.value = null
             try {
                 searchResult.emit(useCase.search(query))
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.e(e, "Search failed")
-                _error.value = e.message ?: "Search failed"
+                _error.value = userFriendlyMessage(e)
             } finally {
                 _isLoading.value = false
             }
