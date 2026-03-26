@@ -53,15 +53,7 @@ fun CreateSearchScreen(navController: NavController, imageLoader: ImageLoader) {
         imageLoader = imageLoader,
         onSearch = { viewModel.search(query.value) },
         onNavigateToUser = { user ->
-            navController.navigate(
-                "${NavigationC.ReposList.ROUTE}/${user.name}/${
-                    //todo don't use avatar in navigation, just take it from db
-                    user.avatar.replace(
-                        "/",
-                        "%2F"
-                    )
-                }"
-            )
+            navController.navigate(NavigationC.ReposList(name = user.name, avatar = user.avatar))
         },
         onNavigateToDownloads = {
             navController.navigate(NavigationC.DownloadScreen)

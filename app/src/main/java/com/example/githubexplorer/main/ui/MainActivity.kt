@@ -17,11 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import coil3.ImageLoader
 import com.example.githubexplorer.BuildConfig
 import com.example.githubexplorer.NavigationC
@@ -68,19 +67,11 @@ class MainActivity : ComponentActivity() {
                             composable<NavigationC.UserFinder> {
                                 CreateSearchScreen(navController, imageLoader)
                             }
-                            composable(
-                                route = "${NavigationC.ReposList.ROUTE}/{name}/{avatar}",
-                                arguments = listOf(
-                                    navArgument("name") { type = NavType.StringType },
-                                    navArgument("avatar") { type = NavType.StringType },
-                                ),
-                            ) { backStackEntry ->
-                                val arguments = requireNotNull(backStackEntry.arguments)
-                                val name = arguments.getString("name")
-                                val avatar = arguments.getString("avatar")?.replace("%2F", "\\/")
+                            composable<NavigationC.ReposList> { backStackEntry ->
+                                val route = backStackEntry.toRoute<NavigationC.ReposList>()
 
                                 CreateReposScreen(
-                                    name = name!!, avatar = avatar, imageLoader = imageLoader,
+                                    name = route.name, avatar = route.avatar, imageLoader = imageLoader,
                                     onDownloadClick = { repo ->
                                         fileDownloader.download(
                                             url = "https://api.github.com/repos/${repo.owner}/${repo.name}/zipball",

@@ -5,12 +5,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class NavigationC {
     @Serializable
-    object UserFinder: NavigationC()
+    object UserFinder : NavigationC()
+
     @Serializable
-    object ReposList : NavigationC(){
-        const val ROUTE = "repos"
-    }
-//    object ReposList: NavigationC()
+    data class ReposList(val name: String, val avatar: String?) : NavigationC()
+
     @Serializable
     object DownloadScreen : NavigationC()
 }
