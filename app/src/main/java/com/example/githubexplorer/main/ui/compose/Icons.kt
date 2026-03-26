@@ -11,62 +11,90 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-object MyIcons {
+object AppIcons {
     @Composable
     fun DownloadIcon() {
         Icon(imageVector = Download, contentDescription = "Download")
     }
 
-    private val Download: ImageVector
-        get() {
-            if (_Download != null) {
-                return _Download!!
+    val Download: ImageVector by lazy {
+        ImageVector.Builder(
+            name = "Download",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 960f,
+            viewportHeight = 960f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(480f, 640f)
+                lineTo(280f, 440f)
+                lineToRelative(56f, -58f)
+                lineToRelative(104f, 104f)
+                verticalLineToRelative(-326f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(326f)
+                lineToRelative(104f, -104f)
+                lineToRelative(56f, 58f)
+                close()
+                moveTo(240f, 800f)
+                quadToRelative(-33f, 0f, -56.5f, -23.5f)
+                reflectiveQuadTo(160f, 720f)
+                verticalLineToRelative(-120f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(120f)
+                horizontalLineToRelative(480f)
+                verticalLineToRelative(-120f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(120f)
+                quadToRelative(0f, 33f, -23.5f, 56.5f)
+                reflectiveQuadTo(720f, 800f)
+                close()
             }
-            _Download = ImageVector.Builder(
-                name = "Download",
-                defaultWidth = 24.dp,
-                defaultHeight = 24.dp,
-                viewportWidth = 960f,
-                viewportHeight = 960f
-            ).apply {
-                path(
-                    fill = SolidColor(Color.Black),
-                    fillAlpha = 1.0f,
-                    stroke = null,
-                    strokeAlpha = 1.0f,
-                    strokeLineWidth = 1.0f,
-                    strokeLineCap = StrokeCap.Butt,
-                    strokeLineJoin = StrokeJoin.Miter,
-                    strokeLineMiter = 1.0f,
-                    pathFillType = PathFillType.NonZero
-                ) {
-                    moveTo(480f, 640f)
-                    lineTo(280f, 440f)
-                    lineToRelative(56f, -58f)
-                    lineToRelative(104f, 104f)
-                    verticalLineToRelative(-326f)
-                    horizontalLineToRelative(80f)
-                    verticalLineToRelative(326f)
-                    lineToRelative(104f, -104f)
-                    lineToRelative(56f, 58f)
-                    close()
-                    moveTo(240f, 800f)
-                    quadToRelative(-33f, 0f, -56.5f, -23.5f)
-                    reflectiveQuadTo(160f, 720f)
-                    verticalLineToRelative(-120f)
-                    horizontalLineToRelative(80f)
-                    verticalLineToRelative(120f)
-                    horizontalLineToRelative(480f)
-                    verticalLineToRelative(-120f)
-                    horizontalLineToRelative(80f)
-                    verticalLineToRelative(120f)
-                    quadToRelative(0f, 33f, -23.5f, 56.5f)
-                    reflectiveQuadTo(720f, 800f)
-                    close()
-                }
-            }.build()
-            return _Download!!
-        }
+        }.build()
+    }
 
-    private var _Download: ImageVector? = null
+    val FolderOpen: ImageVector by lazy {
+        ImageVector.Builder(
+            name = "FolderOpen",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 960f,
+            viewportHeight = 960f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Black),
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(160f, 800f)
+                quadToRelative(-33f, 0f, -56.5f, -23.5f)
+                reflectiveQuadTo(80f, 720f)
+                verticalLineToRelative(-480f)
+                quadToRelative(0f, -33f, 23.5f, -56.5f)
+                reflectiveQuadTo(160f, 160f)
+                horizontalLineToRelative(240f)
+                lineToRelative(80f, 80f)
+                horizontalLineToRelative(320f)
+                quadToRelative(33f, 0f, 56.5f, 23.5f)
+                reflectiveQuadTo(880f, 320f)
+                horizontalLineTo(447f)
+                lineToRelative(-80f, -80f)
+                horizontalLineTo(160f)
+                verticalLineToRelative(480f)
+                lineToRelative(96f, -320f)
+                horizontalLineToRelative(684f)
+                lineToRelative(-108f, 360f)
+                close()
+            }
+        }.build()
+    }
 }

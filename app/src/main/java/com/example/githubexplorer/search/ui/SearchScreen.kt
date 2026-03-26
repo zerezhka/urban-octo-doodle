@@ -33,7 +33,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.githubexplorer.NavigationC
 import com.example.githubexplorer.main.data.GithubUser
-import com.example.githubexplorer.main.ui.compose.MyIcons
+import com.example.githubexplorer.main.ui.compose.AppIcons
 import timber.log.Timber
 
 @Composable
@@ -84,7 +84,7 @@ private fun SearchScreenContent(
         IconButton(
             onClick = onNavigateToDownloads, modifier = Modifier.align(Alignment.End),
         ) {
-            MyIcons.DownloadIcon()
+            AppIcons.DownloadIcon()
         }
         SearchBar(
             inputField = {
