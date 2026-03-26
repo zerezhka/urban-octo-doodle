@@ -8,10 +8,6 @@ import coil3.util.Logger
 import com.example.githubexplorer.main.db.GithubExploraDatabase
 import com.example.githubexplorer.main.db.dao.ReposDao
 import com.example.githubexplorer.main.db.dao.UsersDao
-import com.example.githubexplorer.main.ui.MainActivityViewModel
-import com.example.githubexplorer.main.ui.ReposViewModel
-import com.example.githubexplorer.main.usecase.ReposUseCase
-import com.example.githubexplorer.main.usecase.SearchUseCase
 import com.example.githubexplorer.network.GitHubService
 import com.example.githubexplorer.network.TimberLoggingInterceptor
 import com.ketch.Ketch
@@ -30,22 +26,8 @@ import timber.log.Timber
 import javax.inject.Singleton
 
 @Module
-// provides at whole Application lvl for now, because of OkHttp (and it is singleton)
-// todo refactor okhttp to another dagger module
-// todo return to ActivityComponent::class
-// @InstallIn(ActivityComponent::class)
 @InstallIn(SingletonComponent::class)
 object MainActivityModule {
-    @Provides
-    fun provideMainScreenViewModel(usecase: SearchUseCase): MainActivityViewModel {
-        return MainActivityViewModel(usecase)
-    }
-
-    @Provides
-    fun provideReposScreenViewModel(usecase: ReposUseCase): ReposViewModel {
-        return ReposViewModel(usecase)
-    }
-
     @Singleton
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
