@@ -1,4 +1,4 @@
-package com.example.githubexplorer.main.ui
+package com.example.githubexplorer.search.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -25,12 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.example.githubexplorer.NavigationC
@@ -38,19 +36,16 @@ import com.example.githubexplorer.main.data.GithubUser
 import com.example.githubexplorer.main.ui.compose.MyIcons
 import timber.log.Timber
 
-
 @Composable
-fun CreateSearchScreen(navController: NavController, imageLoader: ImageLoader) {
-    val viewModel = hiltViewModel<MainActivityViewModel>()
+fun SearchScreen(navController: NavController) {
+    val viewModel = hiltViewModel<SearchViewModel>()
     val searchResultUsers = viewModel.searchResult.collectAsState()
     val query = viewModel.query.collectAsState()
     val isLoading = viewModel.isLoading.value
-    SearchUserScreen(
+    SearchScreenContent(
         query = query.value,
         searchResultUsers = searchResultUsers.value,
         isLoading = isLoading,
-        placeHolder = null,
-        imageLoader = imageLoader,
         onSearch = { viewModel.search(query.value) },
         onNavigateToUser = { user ->
             navController.navigate(NavigationC.ReposList(name = user.name, avatar = user.avatar))
@@ -69,12 +64,10 @@ fun CreateSearchScreen(navController: NavController, imageLoader: ImageLoader) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SearchUserScreen(
+private fun SearchScreenContent(
     query: String,
     searchResultUsers: List<GithubUser>,
     isLoading: Boolean,
-    placeHolder: Painter?,
-    imageLoader: ImageLoader?,
     onNavigateToUser: ((GithubUser) -> Unit) = {},
     onNavigateToDownloads: (() -> Unit) = {},
     onSearch: () -> Unit,
@@ -83,7 +76,6 @@ private fun SearchUserScreen(
     onClearText: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -141,7 +133,7 @@ private fun SearchUserScreen(
         AnimatedVisibility(visible = searchResultUsers.isNotEmpty(), enter = fadeIn(), exit = fadeOut()) {
             Column {
                 searchResultUsers.forEach { user ->
-                    UserRow(user, placeHolder, imageLoader, onNavigateToUser)
+                    UserRow(user, onNavigateToUser)
                 }
             }
         }
@@ -151,8 +143,6 @@ private fun SearchUserScreen(
 @Composable
 private fun UserRow(
     user: GithubUser,
-    placeholder: Painter?,
-    imageLoader: ImageLoader?,
     onUserClick: (GithubUser) -> Unit
 ) {
     Row(
@@ -163,45 +153,15 @@ private fun UserRow(
                 onUserClick(user)
             })
     ) {
-        LoadingImageFromInternetCoil(
-            image = user.avatar,
+        AsyncImage(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(RoundedCornerShape(24.dp)),
+            model = ImageRequest.Builder(context = LocalContext.current)
+                .data(user.avatar)
+                .build(),
             contentDescription = "${user.name} avatar",
-            placeholder = placeholder,
-            imageLoader = imageLoader,
         )
         Text(user.name, modifier = Modifier.padding(16.dp))
-    }
-}
-
-@Composable
-fun LoadingImageFromInternetCoil(
-    image: String?,
-    contentDescription: String?,
-    placeholder: Painter?,
-    imageLoader: ImageLoader?,
-) {
-    if (imageLoader != null) {
-        AsyncImage(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(RoundedCornerShape(24.dp)),
-            model = ImageRequest.Builder(context = LocalContext.current)
-                .data(image)
-                .build(),
-            contentDescription = contentDescription,
-            placeholder = placeholder,
-            imageLoader = imageLoader,
-        )
-    } else {
-        AsyncImage(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(RoundedCornerShape(24.dp)),
-            model = ImageRequest.Builder(context = LocalContext.current)
-                .data(image)
-                .build(),
-            contentDescription = contentDescription,
-            placeholder = placeholder,
-        )
     }
 }

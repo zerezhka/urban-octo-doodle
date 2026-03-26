@@ -1,4 +1,4 @@
-package com.example.githubexplorer.main.ui
+package com.example.githubexplorer.search.ui
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -17,11 +17,10 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class MainActivityViewModel @Inject constructor(val useCase: SearchUseCase) : ViewModel() {
+class SearchViewModel @Inject constructor(val useCase: SearchUseCase) : ViewModel() {
     var isLoading: MutableState<Boolean> = mutableStateOf(false)
     var searchResult: MutableStateFlow<List<GithubUser>> = MutableStateFlow(emptyList())
 
-    //first state whether the search is happening or not
     private val _isSearching = MutableStateFlow(false)
     val isSearching = _isSearching.asStateFlow()
 

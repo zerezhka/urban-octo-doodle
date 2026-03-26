@@ -92,7 +92,7 @@ object MainActivityModule {
     @Provides
     fun provideRetrofit(okHttpClient: OkHttpClient, json: Json): GitHubService {
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.github.com/")
+            .baseUrl(GitHubService.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(
                 json.asConverterFactory(

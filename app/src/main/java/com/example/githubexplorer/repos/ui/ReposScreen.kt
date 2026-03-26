@@ -1,7 +1,6 @@
-package com.example.githubexplorer.main.ui
+package com.example.githubexplorer.repos.ui
 
 import android.content.Intent
-import android.os.Environment
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,8 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -30,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
@@ -40,7 +40,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import coil3.ImageLoader
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.example.githubexplorer.main.data.GithubRepository
 import com.example.githubexplorer.main.ui.compose.MyIcons
 import com.ketch.DownloadModel
@@ -48,55 +49,42 @@ import com.ketch.Status
 import java.io.File
 
 @Composable
-fun CreateReposScreen(
-    name: String,
-    avatar: String?,
-    imageLoader: ImageLoader,
-    onDownloadClick: (GithubRepository) -> Unit
-) {
+fun ReposScreen(name: String, avatar: String?) {
     val viewModel = hiltViewModel<ReposViewModel>()
     viewModel.userRepos(name)
     val repos by viewModel.repos.collectAsState()
     val downloadsByTag by viewModel.downloadsByTag.collectAsState()
     val isLoading = repos.isEmpty()
     val context = LocalContext.current
-    ReposListScreen(
+    ReposScreenContent(
         name = name,
         avatar = avatar,
-        imageLoader = imageLoader,
         repos = repos,
         downloadsByTag = downloadsByTag,
         isLoading = isLoading,
-        onDownloadClick = onDownloadClick,
+        onDownloadClick = { viewModel.downloadRepo(it) },
         onLinkClick = {
             val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(it.url))
-            val chooser = Intent.createChooser(intent, "Choose browser")
-            context.startActivity(chooser)
+            context.startActivity(Intent.createChooser(intent, "Choose browser"))
         },
         onOpenFile = { download ->
             val file = File(download.path, download.fileName)
             if (file.exists()) {
-                val uri = FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.provider",
-                    file
-                )
+                val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
                 val intent = Intent(Intent.ACTION_VIEW).apply {
                     setDataAndType(uri, "application/zip")
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                val chooser = Intent.createChooser(intent, "Open with")
-                context.startActivity(chooser)
+                context.startActivity(Intent.createChooser(intent, "Open with"))
             }
         },
     )
 }
 
 @Composable
-private fun ReposListScreen(
+private fun ReposScreenContent(
     name: String?,
     avatar: String?,
-    imageLoader: ImageLoader,
     repos: List<GithubRepository>,
     downloadsByTag: Map<String, DownloadModel>,
     isLoading: Boolean,
@@ -109,11 +97,14 @@ private fun ReposListScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        LoadingImageFromInternetCoil(
-            image = avatar,
+        AsyncImage(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(RoundedCornerShape(24.dp)),
+            model = ImageRequest.Builder(context = LocalContext.current)
+                .data(avatar)
+                .build(),
             contentDescription = "$name's avatar",
-            placeholder = null,
-            imageLoader = imageLoader
         )
         Text(name!!, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp, 4.dp))
 
@@ -153,9 +144,7 @@ private fun RepoItem(
 ) {
     val isDownloaded = download?.status == Status.SUCCESS
 
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -201,18 +190,10 @@ private fun RepoItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (!repo.language.isNullOrBlank()) {
-                    Text(
-                        repo.language,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
+                    Text(repo.language, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
                 }
                 if (repo.stars > 0) {
-                    Text(
-                        "\u2605 ${repo.stars}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("\u2605 ${repo.stars}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -222,18 +203,11 @@ private fun RepoItem(
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(top = 4.dp)
-                    .clickable(onClick = { onRepoClick(repo) })
+                modifier = Modifier.padding(top = 4.dp).clickable(onClick = { onRepoClick(repo) })
             )
 
             if (isDownloaded) {
-                Text(
-                    "Downloaded",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
+                Text("Downloaded", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 2.dp))
             }
         }
     }
@@ -241,35 +215,16 @@ private fun RepoItem(
 
 private val FolderOpenIcon: ImageVector by lazy {
     ImageVector.Builder(
-        name = "FolderOpen",
-        defaultWidth = 24.dp,
-        defaultHeight = 24.dp,
-        viewportWidth = 960f,
-        viewportHeight = 960f
+        name = "FolderOpen", defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 960f, viewportHeight = 960f
     ).apply {
-        path(
-            fill = SolidColor(Color.Black),
-            pathFillType = PathFillType.NonZero
-        ) {
-            moveTo(160f, 800f)
-            quadToRelative(-33f, 0f, -56.5f, -23.5f)
-            reflectiveQuadTo(80f, 720f)
-            verticalLineToRelative(-480f)
-            quadToRelative(0f, -33f, 23.5f, -56.5f)
-            reflectiveQuadTo(160f, 160f)
-            horizontalLineToRelative(240f)
-            lineToRelative(80f, 80f)
-            horizontalLineToRelative(320f)
-            quadToRelative(33f, 0f, 56.5f, 23.5f)
-            reflectiveQuadTo(880f, 320f)
-            horizontalLineTo(447f)
-            lineToRelative(-80f, -80f)
-            horizontalLineTo(160f)
-            verticalLineToRelative(480f)
-            lineToRelative(96f, -320f)
-            horizontalLineToRelative(684f)
-            lineToRelative(-108f, 360f)
-            close()
+        path(fill = SolidColor(Color.Black), pathFillType = PathFillType.NonZero) {
+            moveTo(160f, 800f); quadToRelative(-33f, 0f, -56.5f, -23.5f); reflectiveQuadTo(80f, 720f)
+            verticalLineToRelative(-480f); quadToRelative(0f, -33f, 23.5f, -56.5f); reflectiveQuadTo(160f, 160f)
+            horizontalLineToRelative(240f); lineToRelative(80f, 80f); horizontalLineToRelative(320f)
+            quadToRelative(33f, 0f, 56.5f, 23.5f); reflectiveQuadTo(880f, 320f)
+            horizontalLineTo(447f); lineToRelative(-80f, -80f); horizontalLineTo(160f)
+            verticalLineToRelative(480f); lineToRelative(96f, -320f); horizontalLineToRelative(684f)
+            lineToRelative(-108f, 360f); close()
         }
     }.build()
 }

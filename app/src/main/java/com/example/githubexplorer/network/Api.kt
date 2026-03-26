@@ -10,10 +10,15 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface GitHubService {
+    companion object {
+        const val BASE_URL = "https://api.github.com/"
+        fun zipballUrl(owner: String, repo: String) = "${BASE_URL}repos/$owner/$repo/zipball"
+    }
+
     @Headers(
         "Accept: application/vnd.github.v3+json",
         "Authorization: ${BuildConfig.GITHUB_TOKEN}",
-        "X-GitHub-Api-Version: 2022-11-28"
+        "X-GitHub-Api-Version: 2026-03-10"
     )
     @GET("users/{user}/repos")
     suspend fun listRepos(@Path("user") user: String): List<GithubRepositoryNetwork>
@@ -22,7 +27,7 @@ interface GitHubService {
     @Headers(
         "Accept: application/vnd.github.v3+json",
         "Authorization: ${BuildConfig.GITHUB_TOKEN}",
-        "X-GitHub-Api-Version: 2022-11-28"
+        "X-GitHub-Api-Version: 2026-03-10"
     )
     @GET("search/users")
     suspend fun listUsers(@Query("q")query: String): GithubUserResponse<GithubUser>
