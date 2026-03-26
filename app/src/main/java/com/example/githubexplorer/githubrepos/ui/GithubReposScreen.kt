@@ -2,6 +2,7 @@ package com.example.githubexplorer.githubrepos.ui
 
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.core.net.toUri
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
@@ -64,7 +65,7 @@ fun GithubReposScreen(name: String, avatar: String?) {
         isLoading = isLoading,
         onDownloadClick = { viewModel.downloadRepo(it) },
         onLinkClick = {
-            val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(it.url))
+            val intent = Intent(Intent.ACTION_VIEW, it.url.toUri())
             context.startActivity(Intent.createChooser(intent, "Choose browser"))
         },
         onOpenFile = { download ->

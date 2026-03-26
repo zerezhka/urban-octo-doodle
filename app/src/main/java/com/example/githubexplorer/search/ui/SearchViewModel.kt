@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -20,9 +19,6 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(val useCase: SearchUseCase) : ViewModel() {
     var isLoading: MutableState<Boolean> = mutableStateOf(false)
     var searchResult: MutableStateFlow<List<GithubUser>> = MutableStateFlow(emptyList())
-
-    private val _isSearching = MutableStateFlow(false)
-    val isSearching = _isSearching.asStateFlow()
 
     var query: MutableStateFlow<String> = MutableStateFlow("")
 

@@ -68,13 +68,13 @@ private fun SearchScreenContent(
     query: String,
     searchResultUsers: List<GithubUser>,
     isLoading: Boolean,
-    onNavigateToUser: ((GithubUser) -> Unit) = {},
-    onNavigateToDownloads: (() -> Unit) = {},
     onSearch: () -> Unit,
     onQueryChange: (String) -> Unit,
     onQueryReplace: (String) -> Unit,
     onClearText: () -> Unit,
     modifier: Modifier = Modifier,
+    onNavigateToUser: ((GithubUser) -> Unit) = {},
+    onNavigateToDownloads: (() -> Unit) = {},
 ) {
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
