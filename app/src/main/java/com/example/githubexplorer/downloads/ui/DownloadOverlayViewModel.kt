@@ -6,10 +6,13 @@ import com.ketch.DownloadModel
 import com.ketch.Ketch
 import com.ketch.Status
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,9 +21,18 @@ class DownloadOverlayViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val activeStatuses = listOf(Status.QUEUED, Status.STARTED, Status.PROGRESS)
+    private val seenCompleted = mutableSetOf<Int>()
+
+    private val _completedEvents = Channel<String>(Channel.BUFFERED)
+    val completedEvents = _completedEvents.receiveAsFlow()
 
     val activeDownloads: StateFlow<List<DownloadModel>> = ketch.observeDownloads()
         .map { downloads ->
+            downloads.filter { it.status == Status.SUCCESS }.forEach { dl ->
+                if (seenCompleted.add(dl.id)) {
+                    _completedEvents.trySend("${dl.fileName} downloaded")
+                }
+            }
             downloads.filter { it.status in activeStatuses }.takeLast(3)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

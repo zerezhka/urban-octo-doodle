@@ -1,12 +1,14 @@
 package com.example.githubexplorer.downloads.ui
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,11 +36,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.ketch.DownloadModel
 import com.ketch.Status
+import java.io.File
 
 @Composable
 fun DownloadsScreen() {
@@ -54,6 +59,19 @@ fun DownloadsScreen() {
 private fun ShowDownloadsContent() {
     val viewModel = hiltViewModel<DownloadsViewModel>()
     val downloads by viewModel.downloads.collectAsState()
+    val context = LocalContext.current
+
+    val onOpenFile: (DownloadModel) -> Unit = { download ->
+        val file = File(download.path, download.fileName)
+        if (file.exists()) {
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/zip")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(intent, "Open with"))
+        }
+    }
 
     if (downloads.isEmpty()) {
         Box(
@@ -79,7 +97,9 @@ private fun ShowDownloadsContent() {
                     onRetry = { viewModel.retry(it) },
                     onCancel = { viewModel.cancel(it) },
                     onPause = { viewModel.pause(it) },
-                    onResume = { viewModel.resume(it) }
+                    onResume = { viewModel.resume(it) },
+                    onDelete = { viewModel.delete(it) },
+                    onOpenFile = onOpenFile,
                 )
             }
         }
@@ -92,8 +112,11 @@ private fun DownloadItem(
     onRetry: (Int) -> Unit,
     onCancel: (Int) -> Unit,
     onPause: (Int) -> Unit,
-    onResume: (Int) -> Unit
+    onResume: (Int) -> Unit,
+    onDelete: (Int) -> Unit,
+    onOpenFile: (DownloadModel) -> Unit,
 ) {
+    val isCompleted = download.status == Status.SUCCESS
     val isActive = download.status in listOf(Status.QUEUED, Status.STARTED, Status.PROGRESS)
     val isIndeterminate = download.total <= 0L
     val animatedProgress by animateFloatAsState(
@@ -102,7 +125,11 @@ private fun DownloadItem(
         label = "downloadItemProgress"
     )
 
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (isCompleted) Modifier.clickable { onOpenFile(download) } else Modifier)
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 download.fileName,
@@ -110,6 +137,17 @@ private fun DownloadItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            val owner = download.tag
+                .removePrefix("https://github.com/")
+                .substringBefore("/")
+                .ifEmpty { null }
+            if (owner != null) {
+                Text(
+                    owner,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Spacer(Modifier.height(4.dp))
             Text(
                 statusText(download),
@@ -146,6 +184,9 @@ private fun DownloadItem(
                         FilledTonalButton(onClick = { onRetry(download.id) }) {
                             Text("Retry")
                         }
+                        TextButton(onClick = { onDelete(download.id) }) {
+                            Text("Delete")
+                        }
                     }
                     Status.PAUSED -> {
                         FilledTonalButton(onClick = { onResume(download.id) }) {
@@ -161,6 +202,11 @@ private fun DownloadItem(
                         }
                         TextButton(onClick = { onCancel(download.id) }) {
                             Text("Cancel")
+                        }
+                    }
+                    Status.SUCCESS, Status.CANCELLED -> {
+                        TextButton(onClick = { onDelete(download.id) }) {
+                            Text("Delete")
                         }
                     }
                     else -> {}

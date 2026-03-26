@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,4 +20,5 @@ class DownloadsViewModel @Inject constructor(private val ketch: Ketch) : ViewMod
     fun cancel(id: Int) = ketch.cancel(id)
     fun pause(id: Int) = ketch.pause(id)
     fun resume(id: Int) = ketch.resume(id)
+    fun delete(id: Int) = viewModelScope.launch { ketch.clearDb(id, deleteFile = true) }
 }

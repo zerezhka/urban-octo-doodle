@@ -10,7 +10,16 @@ class RemoteDataSource @Inject constructor(val retrofit: GitHubService) : DataSo
         retrofit.listUsers(query).items
 
     override suspend fun getRepositories(user: String): List<GithubRepository> =
-        retrofit.listRepos(user).map { GithubRepository(it.name, it.linkToRepo, it.owner.login ) }
+        retrofit.listRepos(user).map {
+            GithubRepository(
+                name = it.name,
+                url = it.linkToRepo,
+                owner = it.owner.login,
+                description = it.description,
+                language = it.language,
+                stars = it.stars,
+            )
+        }
 
     fun downloadRepo(repository: GithubRepository) {
         // DownloadManagerImpl.download(repository)
