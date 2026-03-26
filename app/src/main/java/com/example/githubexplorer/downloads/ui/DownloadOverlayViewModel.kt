@@ -22,15 +22,22 @@ class DownloadOverlayViewModel @Inject constructor(
 
     private val activeStatuses = listOf(Status.QUEUED, Status.STARTED, Status.PROGRESS)
     private val seenCompleted = mutableSetOf<Int>()
+    private var initialized = false
 
     private val _completedEvents = Channel<String>(Channel.BUFFERED)
     val completedEvents = _completedEvents.receiveAsFlow()
 
     val activeDownloads: StateFlow<List<DownloadModel>> = ketch.observeDownloads()
         .map { downloads ->
-            downloads.filter { it.status == Status.SUCCESS }.forEach { dl ->
-                if (seenCompleted.add(dl.id)) {
-                    _completedEvents.trySend("${dl.fileName} downloaded")
+            val completed = downloads.filter { it.status == Status.SUCCESS }
+            if (!initialized) {
+                initialized = true
+                seenCompleted.addAll(completed.map { it.id })
+            } else {
+                completed.forEach { dl ->
+                    if (seenCompleted.add(dl.id)) {
+                        _completedEvents.trySend("${dl.fileName} downloaded")
+                    }
                 }
             }
             downloads.filter { it.status in activeStatuses }.takeLast(3)
