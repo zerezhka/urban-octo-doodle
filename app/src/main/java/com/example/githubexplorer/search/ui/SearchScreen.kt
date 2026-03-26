@@ -25,6 +25,7 @@ import androidx.compose.material3.SearchBarDefaults.InputField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,14 +44,16 @@ import timber.log.Timber
 @Composable
 fun SearchScreen(navController: NavController) {
     val viewModel = hiltViewModel<SearchViewModel>()
-    val searchResultUsers = viewModel.searchResult.collectAsState()
-    val query = viewModel.query.collectAsState()
-    val isLoading = viewModel.isLoading.value
+    val searchResultUsers by viewModel.searchResult.collectAsState()
+    val query by viewModel.query.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
     SearchScreenContent(
-        query = query.value,
-        searchResultUsers = searchResultUsers.value,
+        query = query,
+        searchResultUsers = searchResultUsers,
         isLoading = isLoading,
-        onSearch = { viewModel.search(query.value) },
+        error = error,
+        onSearch = { viewModel.search(query) },
         onNavigateToUser = { user ->
             navController.navigate(NavRoute.ReposList(name = user.name, avatar = user.avatar))
         },
@@ -72,6 +75,7 @@ private fun SearchScreenContent(
     query: String,
     searchResultUsers: List<GithubUser>,
     isLoading: Boolean,
+    error: String?,
     onSearch: () -> Unit,
     onQueryChange: (String) -> Unit,
     onQueryReplace: (String) -> Unit,
@@ -136,6 +140,19 @@ private fun SearchScreenContent(
             exit = fadeOut(tween(200))
         ) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+        }
+
+        AnimatedVisibility(
+            visible = error != null,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(200))
+        ) {
+            Text(
+                error ?: "",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(16.dp)
+            )
         }
 
         AnimatedVisibility(

@@ -58,7 +58,8 @@ fun GithubReposScreen(name: String, avatar: String?) {
     viewModel.userRepos(name)
     val repos by viewModel.repos.collectAsState()
     val downloadsByTag by viewModel.downloadsByTag.collectAsState()
-    val isLoading = repos.isEmpty()
+    val error by viewModel.error.collectAsState()
+    val isLoading = repos.isEmpty() && error == null
     val context = LocalContext.current
     ReposScreenContent(
         name = name,
@@ -66,6 +67,7 @@ fun GithubReposScreen(name: String, avatar: String?) {
         repos = repos,
         downloadsByTag = downloadsByTag,
         isLoading = isLoading,
+        error = error,
         onDownloadClick = { viewModel.downloadRepo(it) },
         onLinkClick = {
             val intent = Intent(Intent.ACTION_VIEW, it.url.toUri())
@@ -82,6 +84,7 @@ private fun ReposScreenContent(
     repos: List<GithubRepository>,
     downloadsByTag: Map<String, DownloadModel>,
     isLoading: Boolean,
+    error: String?,
     onDownloadClick: (repo: GithubRepository) -> Unit,
     onLinkClick: (repo: GithubRepository) -> Unit,
     onOpenFile: (download: DownloadModel) -> Unit,
@@ -110,6 +113,19 @@ private fun ReposScreenContent(
             Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
                 LinearProgressIndicator()
             }
+        }
+
+        AnimatedVisibility(
+            visible = error != null,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(200))
+        ) {
+            Text(
+                error ?: "",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(16.dp)
+            )
         }
 
         AnimatedVisibility(

@@ -1,7 +1,5 @@
 package com.example.githubexplorer.search.ui
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.githubexplorer.main.data.GithubUser
@@ -9,36 +7,39 @@ import com.example.githubexplorer.main.usecase.SearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor(val useCase: SearchUseCase) : ViewModel() {
-    var isLoading: MutableState<Boolean> = mutableStateOf(false)
-    var searchResult: MutableStateFlow<List<GithubUser>> = MutableStateFlow(emptyList())
+class SearchViewModel @Inject constructor(private val useCase: SearchUseCase) : ViewModel() {
 
-    var query: MutableStateFlow<String> = MutableStateFlow("")
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
+
+    val searchResult = MutableStateFlow<List<GithubUser>>(emptyList())
+    val query = MutableStateFlow("")
 
     private var request: Job? = null
 
     fun search(query: String) {
         request?.cancel()
-        request = viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                isLoading.value = true
-                val result = async { useCase.search(query) }
-                searchResult.emit(result.await())
-                isLoading.value = false
+        request = viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                searchResult.emit(useCase.search(query))
+            } catch (e: Exception) {
+                Timber.e(e, "Search failed")
+                _error.value = e.message ?: "Search failed"
+            } finally {
+                _isLoading.value = false
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        request?.cancel()
-        request = null
     }
 }

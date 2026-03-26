@@ -15,9 +15,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,7 +27,10 @@ class GithubReposViewModel @Inject constructor(
     private val reposUseCase: ReposUseCase,
     private val ketch: Ketch
 ) : ViewModel() {
-    val repos: MutableStateFlow<List<GithubRepository>> = MutableStateFlow(emptyList())
+    val repos = MutableStateFlow<List<GithubRepository>>(emptyList())
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
 
     val downloadsByTag: StateFlow<Map<String, DownloadModel>> = ketch.observeDownloads()
         .map { downloads -> downloads.associateBy { it.tag } }
@@ -35,7 +40,13 @@ class GithubReposViewModel @Inject constructor(
     fun userRepos(userName: String) {
         request?.cancel()
         request = viewModelScope.launch(Dispatchers.IO) {
-            repos.emit(reposUseCase.userRepos(userName))
+            _error.value = null
+            try {
+                repos.emit(reposUseCase.userRepos(userName))
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to load repos")
+                _error.value = e.message ?: "Failed to load repos"
+            }
         }
     }
 
@@ -44,8 +55,8 @@ class GithubReposViewModel @Inject constructor(
             url = GitHubService.zipballUrl(repo.owner, repo.name),
             headers = hashMapOf(
                 "Authorization" to BuildConfig.GITHUB_TOKEN,
-                "Accept" to "application.vnd.github.v3+json",
-                "X-GitHub-Api-Version" to "2022-11-28"
+                "Accept" to "application/vnd.github.v3+json",
+                "X-GitHub-Api-Version" to "2026-03-10"
             ),
             path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path,
             fileName = repo.name,
