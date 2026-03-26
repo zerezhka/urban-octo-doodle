@@ -1,5 +1,8 @@
 package com.example.githubexplorer.main.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,6 +14,8 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults.InputField
 import androidx.compose.material3.Text
@@ -20,11 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
@@ -40,9 +44,11 @@ fun CreateSearchScreen(navController: NavController, imageLoader: ImageLoader) {
     val viewModel = hiltViewModel<MainActivityViewModel>()
     val searchResultUsers = viewModel.searchResult.collectAsState()
     val query = viewModel.query.collectAsState()
+    val isLoading = viewModel.isLoading.value
     SearchUserScreen(
         query = query.value,
         searchResultUsers = searchResultUsers.value,
+        isLoading = isLoading,
         placeHolder = null,
         imageLoader = imageLoader,
         onSearch = { viewModel.search(query.value) },
@@ -74,6 +80,7 @@ fun CreateSearchScreen(navController: NavController, imageLoader: ImageLoader) {
 private fun SearchUserScreen(
     query: String,
     searchResultUsers: List<GithubUser>,
+    isLoading: Boolean,
     placeHolder: Painter?,
     imageLoader: ImageLoader?,
     onNavigateToUser: ((GithubUser) -> Unit) = {},
@@ -123,20 +130,28 @@ private fun SearchUserScreen(
         ) {}
 
         Row {
-            Text("type username, e.g.")
+            Text("type username, e.g. ")
             Text(
-                "zerezhka", color = Color(20, 20, 255, 255),
+                "zerezhka", color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable(
                     onClick = {
                         expanded = false
                         onQueryReplace.invoke("zerezhka")
-
                     }
                 )
             )
         }
-        searchResultUsers.forEach { user ->
-            UserRow(user, placeHolder, imageLoader, onNavigateToUser)
+
+        AnimatedVisibility(visible = isLoading, enter = fadeIn(), exit = fadeOut()) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
+        }
+
+        AnimatedVisibility(visible = searchResultUsers.isNotEmpty(), enter = fadeIn(), exit = fadeOut()) {
+            Column {
+                searchResultUsers.forEach { user ->
+                    UserRow(user, placeHolder, imageLoader, onNavigateToUser)
+                }
+            }
         }
     }
 }

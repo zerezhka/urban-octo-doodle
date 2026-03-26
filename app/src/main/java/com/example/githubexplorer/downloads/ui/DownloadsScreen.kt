@@ -5,72 +5,199 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.ketch.DownloadModel
 import com.ketch.Status
 
 @Composable
 fun DownloadsScreen() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        var hasPermission = remember { mutableStateOf(false) }
-        requestPostNotificationPermission(hasPermission)
+        val hasPermission = remember { mutableStateOf(false) }
+        RequestPostNotificationPermission(hasPermission)
     } else {
-        ShowDownloadsScreen()
+        ShowDownloadsContent()
     }
 }
 
 @Composable
-fun ShowDownloadsScreen() {
+private fun ShowDownloadsContent() {
     val viewModel = hiltViewModel<DownloadsViewModel>()
-    viewModel.getKetchDownloads()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        val downloads = viewModel.downloads.collectAsState()
-        downloads.value.forEach {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text("Download: ${it.url}")
-                Text("status: ${it.status}")
-                if (it.status == Status.FAILED) {
-                    Text(it.failureReason)
-                }
-                HorizontalDivider(modifier = Modifier.fillMaxSize())
+    val downloads by viewModel.downloads.collectAsState()
+
+    if (downloads.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                "No downloads yet",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(downloads, key = { it.id }) { download ->
+                DownloadItem(
+                    download = download,
+                    onRetry = { viewModel.retry(it) },
+                    onCancel = { viewModel.cancel(it) },
+                    onPause = { viewModel.pause(it) },
+                    onResume = { viewModel.resume(it) }
+                )
             }
         }
     }
+}
 
+@Composable
+private fun DownloadItem(
+    download: DownloadModel,
+    onRetry: (Int) -> Unit,
+    onCancel: (Int) -> Unit,
+    onPause: (Int) -> Unit,
+    onResume: (Int) -> Unit
+) {
+    val isActive = download.status in listOf(Status.QUEUED, Status.STARTED, Status.PROGRESS)
+    val isIndeterminate = download.total <= 0L
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (isIndeterminate || !isActive) 0f else download.progress / 100f,
+        animationSpec = tween(300),
+        label = "downloadItemProgress"
+    )
+
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                download.fileName,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                statusText(download),
+                style = MaterialTheme.typography.bodySmall,
+                color = statusColor(download.status)
+            )
+
+            if (isActive) {
+                Spacer(Modifier.height(8.dp))
+                if (isIndeterminate) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                } else {
+                    LinearProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text("${download.progress}%", style = MaterialTheme.typography.bodySmall)
+                }
+            }
+
+            if (download.status == Status.FAILED && download.failureReason.isNotEmpty()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    download.failureReason,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                when (download.status) {
+                    Status.FAILED -> {
+                        FilledTonalButton(onClick = { onRetry(download.id) }) {
+                            Text("Retry")
+                        }
+                    }
+                    Status.PAUSED -> {
+                        FilledTonalButton(onClick = { onResume(download.id) }) {
+                            Text("Resume")
+                        }
+                        TextButton(onClick = { onCancel(download.id) }) {
+                            Text("Cancel")
+                        }
+                    }
+                    Status.QUEUED, Status.STARTED, Status.PROGRESS -> {
+                        TextButton(onClick = { onPause(download.id) }) {
+                            Text("Pause")
+                        }
+                        TextButton(onClick = { onCancel(download.id) }) {
+                            Text("Cancel")
+                        }
+                    }
+                    else -> {}
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun statusColor(status: Status) = when (status) {
+    Status.SUCCESS -> MaterialTheme.colorScheme.primary
+    Status.FAILED -> MaterialTheme.colorScheme.error
+    Status.PAUSED -> MaterialTheme.colorScheme.tertiary
+    else -> MaterialTheme.colorScheme.onSurfaceVariant
+}
+
+private fun statusText(download: DownloadModel) = when (download.status) {
+    Status.QUEUED -> "Queued"
+    Status.STARTED -> "Starting..."
+    Status.PROGRESS -> if (download.total > 0) "${download.progress}%" else "Downloading..."
+    Status.SUCCESS -> "Completed"
+    Status.FAILED -> "Failed"
+    Status.PAUSED -> "Paused"
+    Status.CANCELLED -> "Cancelled"
+    else -> ""
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("ComposableNaming")
 @Composable
-fun requestPostNotificationPermission(hasPermission: MutableState<Boolean>) {
+private fun RequestPostNotificationPermission(hasPermission: MutableState<Boolean>) {
     val requestPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { hasPermission.value = it }
     )
     LaunchedEffect("requestPermission") {
-        // throws launcher has not been initialized, if not wrapped in LaunchedEffect
         requestPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
     }
     if (!hasPermission.value) {
@@ -85,6 +212,6 @@ fun requestPostNotificationPermission(hasPermission: MutableState<Boolean>) {
             }
         }
     } else {
-        ShowDownloadsScreen()
+        ShowDownloadsContent()
     }
 }

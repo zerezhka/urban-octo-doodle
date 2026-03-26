@@ -1,7 +1,11 @@
 package com.example.githubexplorer.main.ui
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,15 +15,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.ImageLoader
 import com.example.githubexplorer.main.data.GithubRepository
 import com.example.githubexplorer.main.ui.compose.MyIcons
@@ -34,18 +41,20 @@ fun CreateReposScreen(
 ) {
     val viewModel = hiltViewModel<ReposViewModel>()
     viewModel.userRepos(name)
-    val repos = viewModel.repos.collectAsState()
+    val repos by viewModel.repos.collectAsState()
+    val isLoading = repos.isEmpty()
     val context = LocalContext.current
     ReposListScreen(
         name = name,
         avatar = avatar,
         imageLoader = imageLoader,
-        repos = repos.value,
+        repos = repos,
+        isLoading = isLoading,
         onDownloadClick = onDownloadClick,
         onLinkClick = {
             val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(it.url))
-            val choser = Intent.createChooser(intent, "Choose browser")
-            context.startActivity(choser)
+            val chooser = Intent.createChooser(intent, "Choose browser")
+            context.startActivity(chooser)
         },
     )
 }
@@ -56,6 +65,7 @@ private fun ReposListScreen(
     avatar: String?,
     imageLoader: ImageLoader,
     repos: List<GithubRepository>,
+    isLoading: Boolean,
     onDownloadClick: (repo: GithubRepository) -> Unit,
     onLinkClick: (repo: GithubRepository) -> Unit,
 ) {
@@ -70,20 +80,30 @@ private fun ReposListScreen(
             placeholder = null,
             imageLoader = imageLoader
         )
-        Text(name!!)
+        Text(name!!, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp, 4.dp))
 
-        repos.forEach {
-            RepoItem(
-                repo = it,
-                onRepoClick = onLinkClick,
-                onDownloadClick = onDownloadClick
-            )
+        AnimatedVisibility(visible = isLoading, enter = fadeIn(), exit = fadeOut()) {
+            Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                LinearProgressIndicator()
+            }
+        }
+
+        AnimatedVisibility(visible = repos.isNotEmpty(), enter = fadeIn(), exit = fadeOut()) {
+            Column {
+                repos.forEach {
+                    RepoItem(
+                        repo = it,
+                        onRepoClick = onLinkClick,
+                        onDownloadClick = onDownloadClick
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun RepoItem(
+private fun RepoItem(
     repo: GithubRepository,
     onRepoClick: (repo: GithubRepository) -> Unit,
     onDownloadClick: (GithubRepository) -> Unit
@@ -93,7 +113,7 @@ fun RepoItem(
             .padding(16.dp, 8.dp)
             .fillMaxSize()
     ) {
-        Row (modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)) {
+        Row(modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)) {
             Text(repo.name, fontSize = 20.sp, modifier = Modifier.align(Alignment.CenterVertically).weight(4f))
             IconButton(onClick = {
                 onDownloadClick.invoke(repo)
@@ -104,7 +124,7 @@ fun RepoItem(
         Text(
             repo.url,
             fontSize = 16.sp,
-            color = androidx.compose.ui.graphics.Color.Blue,
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .padding(0.dp, 8.dp)
                 .clickable(onClick = { onRepoClick.invoke(repo) })

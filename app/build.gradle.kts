@@ -60,7 +60,6 @@ dependencies {
     // Compose
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-//    implementation(platform(libs.androidx.compose.animation))
     implementation(libs.androidx.navigation.compose)
 
     implementation(libs.androidx.ui)

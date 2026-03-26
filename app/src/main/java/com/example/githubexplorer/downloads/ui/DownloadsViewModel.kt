@@ -5,17 +5,18 @@ import androidx.lifecycle.viewModelScope
 import com.ketch.DownloadModel
 import com.ketch.Ketch
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
-class DownloadsViewModel @Inject constructor(val ketch: Ketch): ViewModel() {
-    val downloads: MutableStateFlow<List<DownloadModel>> = MutableStateFlow(emptyList())
-    fun getKetchDownloads() {
-        viewModelScope.launch(Dispatchers.IO) {
-            downloads.emit( ketch.getAllDownloads())
-        }
-    }
+class DownloadsViewModel @Inject constructor(private val ketch: Ketch) : ViewModel() {
+    val downloads: StateFlow<List<DownloadModel>> = ketch.observeDownloads()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun retry(id: Int) = ketch.retry(id)
+    fun cancel(id: Int) = ketch.cancel(id)
+    fun pause(id: Int) = ketch.pause(id)
+    fun resume(id: Int) = ketch.resume(id)
 }
