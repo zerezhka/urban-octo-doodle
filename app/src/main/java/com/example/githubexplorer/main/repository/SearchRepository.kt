@@ -3,19 +3,13 @@ package com.example.githubexplorer.main.repository
 import com.example.githubexplorer.main.data.GithubUser
 import javax.inject.Inject
 
-open class SearchRepository @Inject constructor(
-    val localDataSource: LocalDataSource,
-    val remoteDataSource: RemoteDataSource
+class SearchRepository @Inject constructor(
+    private val localDataSource: LocalDataSource,
+    private val remoteDataSource: RemoteDataSource
 ) {
     suspend fun search(query: String): List<GithubUser> {
-        return localDataSource.search(query)
-            .ifEmpty {
-                remoteDataSource.search(query)
-                    .also { localDataSource.save(it) }
-            }.also {
-                remoteDataSource.search(query)
-                    .also { localDataSource.save(it) }
-            }
+        return localDataSource.search(query).ifEmpty {
+            remoteDataSource.search(query).also { localDataSource.save(it) }
+        }
     }
-
 }
