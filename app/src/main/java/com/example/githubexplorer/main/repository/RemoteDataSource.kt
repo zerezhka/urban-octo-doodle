@@ -5,7 +5,7 @@ import com.example.githubexplorer.main.data.GithubUser
 import com.example.githubexplorer.network.GitHubService
 import javax.inject.Inject
 
-class RemoteDataSource @Inject constructor(val retrofit: GitHubService) : DataSource {
+class RemoteDataSource @Inject constructor(private val retrofit: GitHubService) : SearchDataSource, RepoDataSource {
     override suspend fun search(query: String): List<GithubUser> =
         retrofit.listUsers(query).items
 

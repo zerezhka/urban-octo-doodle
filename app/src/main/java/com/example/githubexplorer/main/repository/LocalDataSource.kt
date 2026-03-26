@@ -9,7 +9,7 @@ import javax.inject.Inject
 class LocalDataSource @Inject constructor(
     private val reposDao: ReposDao,
     private val usersDao: UsersDao
-) : DataSource {
+) : SearchDataSource, RepoDataSource {
     override suspend fun search(query: String): List<GithubUser> {
         return usersDao.getAllContaining(name = query).map {
             Converter.fromDatabase(it)
