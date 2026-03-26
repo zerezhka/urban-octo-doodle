@@ -31,7 +31,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import com.example.githubexplorer.NavigationC
+import com.example.githubexplorer.NavRoute
 import com.example.githubexplorer.main.data.GithubUser
 import com.example.githubexplorer.main.ui.compose.AppIcons
 import timber.log.Timber
@@ -48,10 +48,10 @@ fun SearchScreen(navController: NavController) {
         isLoading = isLoading,
         onSearch = { viewModel.search(query.value) },
         onNavigateToUser = { user ->
-            navController.navigate(NavigationC.ReposList(name = user.name, avatar = user.avatar))
+            navController.navigate(NavRoute.ReposList(name = user.name, avatar = user.avatar))
         },
         onNavigateToDownloads = {
-            navController.navigate(NavigationC.DownloadScreen)
+            navController.navigate(NavRoute.DownloadScreen)
         },
         onQueryChange = { viewModel.query.value = it },
         onQueryReplace = {

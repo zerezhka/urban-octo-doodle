@@ -24,7 +24,7 @@ private const val DATABASE_VERSION = 3
         AutoMigration(from = 1, to = 2)
     ]
 )
-abstract class GithubExploraDatabase : RoomDatabase() {
+abstract class GithubExplorerDatabase : RoomDatabase() {
     abstract fun usersDao(): UsersDao
     abstract fun reposDao(): ReposDao
 }

@@ -5,7 +5,7 @@ import androidx.room.Room
 import coil3.ImageLoader
 import coil3.request.CachePolicy
 import coil3.util.Logger
-import com.example.githubexplorer.main.db.GithubExploraDatabase
+import com.example.githubexplorer.main.db.GithubExplorerDatabase
 import com.example.githubexplorer.main.db.dao.ReposDao
 import com.example.githubexplorer.main.db.dao.UsersDao
 import com.example.githubexplorer.network.GitHubService
@@ -40,13 +40,13 @@ object MainActivityModule {
     @Singleton
     @Provides
     fun provideUsersDao(
-        database: GithubExploraDatabase
+        database: GithubExplorerDatabase
     ): UsersDao = database.usersDao()
 
     @Singleton
     @Provides
     fun provideReposDao(
-        database: GithubExploraDatabase
+        database: GithubExplorerDatabase
     ): ReposDao = database.reposDao()
 
     @Singleton
@@ -54,9 +54,9 @@ object MainActivityModule {
     fun provideDatabase(
         @ApplicationContext
         context: Context
-    ): GithubExploraDatabase =
+    ): GithubExplorerDatabase =
         Room
-            .databaseBuilder(context, GithubExploraDatabase::class.java, "github_explorer.db")
+            .databaseBuilder(context, GithubExplorerDatabase::class.java, "github_explorer.db")
             .fallbackToDestructiveMigration()
             .build()
 
