@@ -1,7 +1,10 @@
 package com.example.githubexplorer.main.ui
 
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -21,8 +24,10 @@ fun AppNavGraph(
     NavHost(
         navController = navController,
         startDestination = NavRoute.UserFinder,
-        enterTransition = { fadeIn() },
-        exitTransition = { fadeOut() },
+        enterTransition = { slideInHorizontally(tween(300)) { it / 3 } + fadeIn(tween(300)) },
+        exitTransition = { slideOutHorizontally(tween(300)) { -it / 3 } + fadeOut(tween(200)) },
+        popEnterTransition = { slideInHorizontally(tween(300)) { -it / 3 } + fadeIn(tween(300)) },
+        popExitTransition = { slideOutHorizontally(tween(300)) { it / 3 } + fadeOut(tween(200)) },
         modifier = modifier
     ) {
         composable<NavRoute.UserFinder> {

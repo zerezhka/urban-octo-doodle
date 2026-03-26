@@ -1,10 +1,18 @@
 package com.example.githubexplorer.githubrepos.ui
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.core.net.toUri
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -93,26 +102,45 @@ private fun ReposScreenContent(
         )
         Text(name!!, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp, 4.dp))
 
-        AnimatedVisibility(visible = isLoading, enter = fadeIn(), exit = fadeOut()) {
+        AnimatedVisibility(
+            visible = isLoading,
+            enter = fadeIn(tween(200)),
+            exit = fadeOut(tween(200))
+        ) {
             Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
                 LinearProgressIndicator()
             }
         }
 
-        AnimatedVisibility(visible = repos.isNotEmpty(), enter = fadeIn(), exit = fadeOut()) {
+        AnimatedVisibility(
+            visible = repos.isNotEmpty(),
+            enter = fadeIn(tween(300)),
+            exit = fadeOut(tween(200))
+        ) {
             Column(
                 modifier = Modifier.padding(horizontal = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                repos.forEach { repo ->
+                repos.forEachIndexed { index, repo ->
                     val download = downloadsByTag[repo.url]
-                    RepoItem(
-                        repo = repo,
-                        download = download,
-                        onRepoClick = onLinkClick,
-                        onDownloadClick = onDownloadClick,
-                        onOpenFile = onOpenFile,
-                    )
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = slideInVertically(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessLow
+                            ),
+                            initialOffsetY = { it }
+                        ) + fadeIn(tween(durationMillis = 300, delayMillis = index * 40)),
+                    ) {
+                        RepoItem(
+                            repo = repo,
+                            download = download,
+                            onRepoClick = onLinkClick,
+                            onDownloadClick = onDownloadClick,
+                            onOpenFile = onOpenFile,
+                        )
+                    }
                 }
             }
         }
@@ -129,7 +157,11 @@ private fun RepoItem(
 ) {
     val isDownloaded = download?.status == Status.SUCCESS
 
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(spring(stiffness = Spring.StiffnessLow))
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -153,17 +185,26 @@ private fun RepoItem(
                     }
                 }
 
-                if (isDownloaded) {
-                    IconButton(onClick = { onOpenFile(download!!) }) {
-                        Icon(
-                            imageVector = AppIcons.FolderOpen,
-                            contentDescription = "Open file",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                } else {
-                    IconButton(onClick = { onDownloadClick(repo) }) {
-                        AppIcons.DownloadIcon()
+                AnimatedContent(
+                    targetState = isDownloaded,
+                    transitionSpec = {
+                        (scaleIn(tween(300)) + fadeIn(tween(300)))
+                            .togetherWith(scaleOut(tween(200)) + fadeOut(tween(200)))
+                    },
+                    label = "downloadIconTransition"
+                ) { downloaded ->
+                    if (downloaded) {
+                        IconButton(onClick = { onOpenFile(download!!) }) {
+                            Icon(
+                                imageVector = AppIcons.FolderOpen,
+                                contentDescription = "Open file",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = { onDownloadClick(repo) }) {
+                            AppIcons.DownloadIcon()
+                        }
                     }
                 }
             }
@@ -191,8 +232,17 @@ private fun RepoItem(
                 modifier = Modifier.padding(top = 4.dp).clickable(onClick = { onRepoClick(repo) })
             )
 
-            if (isDownloaded) {
-                Text("Downloaded", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 2.dp))
+            AnimatedVisibility(
+                visible = isDownloaded,
+                enter = fadeIn(tween(300)) + slideInVertically(tween(300)),
+                exit = fadeOut(tween(200))
+            ) {
+                Text(
+                    "Downloaded",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
             }
         }
     }

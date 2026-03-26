@@ -1,8 +1,12 @@
 package com.example.githubexplorer.search.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -126,14 +130,33 @@ private fun SearchScreenContent(
             )
         }
 
-        AnimatedVisibility(visible = isLoading, enter = fadeIn(), exit = fadeOut()) {
+        AnimatedVisibility(
+            visible = isLoading,
+            enter = fadeIn(tween(200)) + slideInVertically(tween(300)),
+            exit = fadeOut(tween(200))
+        ) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp))
         }
 
-        AnimatedVisibility(visible = searchResultUsers.isNotEmpty(), enter = fadeIn(), exit = fadeOut()) {
+        AnimatedVisibility(
+            visible = searchResultUsers.isNotEmpty(),
+            enter = fadeIn(tween(300)),
+            exit = fadeOut(tween(200))
+        ) {
             Column {
-                searchResultUsers.forEach { user ->
-                    UserRow(user, onNavigateToUser)
+                searchResultUsers.forEachIndexed { index, user ->
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = slideInVertically(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessLow
+                            ),
+                            initialOffsetY = { it * (index + 1) }
+                        ) + fadeIn(tween(durationMillis = 300, delayMillis = index * 60)),
+                    ) {
+                        UserRow(user, onNavigateToUser)
+                    }
                 }
             }
         }
@@ -152,6 +175,8 @@ private fun UserRow(
                 Timber.d("UserRow: $user")
                 onUserClick(user)
             })
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
             modifier = Modifier
@@ -162,6 +187,10 @@ private fun UserRow(
                 .build(),
             contentDescription = "${user.name} avatar",
         )
-        Text(user.name, modifier = Modifier.padding(16.dp))
+        Text(
+            user.name,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
