@@ -43,8 +43,8 @@ import com.ketch.Status
 
 @Composable
 fun DownloadsScreen() {
+    val hasPermission = remember { mutableStateOf(false) }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        val hasPermission = remember { mutableStateOf(false) }
         PostNotificationPermissionGate(hasPermission)
     } else {
         ShowDownloadsContent()
@@ -228,7 +228,7 @@ private fun PostNotificationPermissionGate(hasPermission: MutableState<Boolean>)
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { hasPermission.value = it }
     )
-    LaunchedEffect("requestPermission") {
+    LaunchedEffect(Unit) {
         requestPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
     }
     if (!hasPermission.value) {

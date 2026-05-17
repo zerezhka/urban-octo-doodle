@@ -1,17 +1,15 @@
 package com.example.githubexplorer.downloads.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CardDefaults
@@ -23,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,22 +35,16 @@ fun DownloadProgressOverlay(
     onCancel: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxWidth()
+            .heightIn(max = 600.dp)
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        reverseLayout = true
     ) {
-        activeDownloads.forEach { download ->
-            key(download.id) {
-                AnimatedVisibility(
-                    visible = true,
-                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-                ) {
-                    DownloadProgressCard(download, onCancel)
-                }
-            }
+        items(activeDownloads, key = { it.id }) { download ->
+            DownloadProgressCard(download, onCancel, modifier = Modifier.animateItem())
         }
     }
 }
@@ -61,7 +52,8 @@ fun DownloadProgressOverlay(
 @Composable
 private fun DownloadProgressCard(
     download: DownloadModel,
-    onCancel: (Int) -> Unit
+    onCancel: (Int) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val isIndeterminate = download.total <= 0L
     val animatedProgress by animateFloatAsState(
@@ -71,7 +63,7 @@ private fun DownloadProgressCard(
     )
 
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp)
     ) {
         Row(

@@ -60,7 +60,7 @@ fun GithubReposScreen(name: String, avatar: String?) {
     val repos by viewModel.repos.collectAsState()
     val downloadsByTag by viewModel.downloadsByTag.collectAsState()
     val error by viewModel.error.collectAsState()
-    val isLoading = repos.isEmpty() && error == null
+    val isLoading by viewModel.isLoading.collectAsState()
     val context = LocalContext.current
     ReposScreenContent(
         name = name,
@@ -80,7 +80,7 @@ fun GithubReposScreen(name: String, avatar: String?) {
 
 @Composable
 private fun ReposScreenContent(
-    name: String?,
+    name: String,
     avatar: String?,
     repos: List<GithubRepository>,
     downloadsByTag: Map<String, DownloadModel>,
@@ -105,7 +105,7 @@ private fun ReposScreenContent(
                     .build(),
                 contentDescription = "$name's avatar",
             )
-            Text(name!!, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp, 4.dp))
+            Text(name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp, 4.dp))
 
             AnimatedVisibility(
                 visible = isLoading,

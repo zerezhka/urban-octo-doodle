@@ -32,6 +32,9 @@ class GithubReposViewModel @Inject constructor(
     private val _repos = MutableStateFlow<List<GithubRepository>>(emptyList())
     val repos = _repos.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
@@ -43,6 +46,7 @@ class GithubReposViewModel @Inject constructor(
     fun userRepos(userName: String) {
         request?.cancel()
         request = viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
             _error.value = null
             try {
                 _repos.emit(reposUseCase.userRepos(userName))
@@ -51,6 +55,8 @@ class GithubReposViewModel @Inject constructor(
             } catch (e: Exception) {
                 Timber.e(e, "Failed to load repos")
                 _error.value = userFriendlyMessage(e)
+            } finally {
+                _isLoading.value = false
             }
         }
     }
