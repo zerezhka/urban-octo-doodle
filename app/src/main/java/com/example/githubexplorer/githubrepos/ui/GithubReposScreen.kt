@@ -11,12 +11,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,9 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -90,76 +90,57 @@ private fun ReposScreenContent(
     onLinkClick: (repo: GithubRepository) -> Unit,
     onOpenFile: (download: DownloadModel) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        AsyncImage(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(RoundedCornerShape(24.dp)),
-            model = ImageRequest.Builder(context = LocalContext.current)
-                .data(avatar)
-                .build(),
-            contentDescription = "$name's avatar",
-        )
-        Text(name!!, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp, 4.dp))
-
-        AnimatedVisibility(
-            visible = isLoading,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200))
-        ) {
-            Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                LinearProgressIndicator()
-            }
-        }
-
-        AnimatedVisibility(
-            visible = error != null,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200))
-        ) {
-            Text(
-                error ?: "",
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(16.dp)
+        item {
+            AsyncImage(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(RoundedCornerShape(24.dp)),
+                model = ImageRequest.Builder(context = LocalContext.current)
+                    .data(avatar)
+                    .build(),
+                contentDescription = "$name's avatar",
             )
-        }
+            Text(name!!, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp, 4.dp))
 
-        AnimatedVisibility(
-            visible = repos.isNotEmpty(),
-            enter = fadeIn(tween(300)),
-            exit = fadeOut(tween(200))
-        ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            AnimatedVisibility(
+                visible = isLoading,
+                enter = fadeIn(tween(200)),
+                exit = fadeOut(tween(200))
             ) {
-                repos.forEachIndexed { index, repo ->
-                    val download = downloadsByTag[repo.url]
-                    AnimatedVisibility(
-                        visible = true,
-                        enter = slideInVertically(
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                                stiffness = Spring.StiffnessLow
-                            ),
-                            initialOffsetY = { it }
-                        ) + fadeIn(tween(durationMillis = 300, delayMillis = index * 40)),
-                    ) {
-                        RepoItem(
-                            repo = repo,
-                            download = download,
-                            onRepoClick = onLinkClick,
-                            onDownloadClick = onDownloadClick,
-                            onOpenFile = onOpenFile,
-                        )
-                    }
+                Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                    LinearProgressIndicator()
                 }
             }
+
+            AnimatedVisibility(
+                visible = error != null,
+                enter = fadeIn(tween(200)),
+                exit = fadeOut(tween(200))
+            ) {
+                Text(
+                    error ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+
+        items(repos, key = { it.url }) { repo ->
+            val download = downloadsByTag[repo.url]
+            RepoItem(
+                repo = repo,
+                download = download,
+                onRepoClick = onLinkClick,
+                onDownloadClick = onDownloadClick,
+                onOpenFile = onOpenFile,
+                modifier = Modifier.animateItem(),
+            )
         }
     }
 }
@@ -171,11 +152,12 @@ private fun RepoItem(
     onRepoClick: (repo: GithubRepository) -> Unit,
     onDownloadClick: (GithubRepository) -> Unit,
     onOpenFile: (DownloadModel) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val isDownloaded = download?.status == Status.SUCCESS
 
     ElevatedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .animateContentSize(spring(stiffness = Spring.StiffnessLow))
     ) {

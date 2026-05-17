@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.githubexplorer.NavRoute
 import com.example.githubexplorer.downloads.ui.DownloadsScreen
+import com.example.githubexplorer.main.data.GithubUser
 import com.example.githubexplorer.githubrepos.ui.GithubReposScreen
 import com.example.githubexplorer.search.ui.SearchScreen
 
@@ -31,7 +32,12 @@ fun AppNavGraph(
         modifier = modifier
     ) {
         composable<NavRoute.UserFinder> {
-            SearchScreen(navController)
+            SearchScreen(
+                onNavigateToUser = { user ->
+                    navController.navigate(NavRoute.ReposList(name = user.name, avatar = user.avatar))
+                },
+                onNavigateToDownloads = { navController.navigate(NavRoute.DownloadScreen) },
+            )
         }
         composable<NavRoute.ReposList> { backStackEntry ->
             val route = backStackEntry.toRoute<NavRoute.ReposList>()

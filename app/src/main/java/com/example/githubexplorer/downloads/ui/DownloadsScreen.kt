@@ -1,6 +1,5 @@
 package com.example.githubexplorer.downloads.ui
 
-import android.annotation.SuppressLint
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,7 +45,7 @@ import com.ketch.Status
 fun DownloadsScreen() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val hasPermission = remember { mutableStateOf(false) }
-        RequestPostNotificationPermission(hasPermission)
+        PostNotificationPermissionGate(hasPermission)
     } else {
         ShowDownloadsContent()
     }
@@ -223,9 +222,8 @@ private fun statusText(download: DownloadModel) = when (download.status) {
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-@SuppressLint("ComposableNaming")
 @Composable
-private fun RequestPostNotificationPermission(hasPermission: MutableState<Boolean>) {
+private fun PostNotificationPermissionGate(hasPermission: MutableState<Boolean>) {
     val requestPermission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { hasPermission.value = it }

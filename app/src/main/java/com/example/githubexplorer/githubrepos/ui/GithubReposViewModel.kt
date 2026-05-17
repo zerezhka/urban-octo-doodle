@@ -29,7 +29,8 @@ class GithubReposViewModel @Inject constructor(
     private val reposUseCase: ReposUseCase,
     private val ketch: Ketch
 ) : ViewModel() {
-    val repos = MutableStateFlow<List<GithubRepository>>(emptyList())
+    private val _repos = MutableStateFlow<List<GithubRepository>>(emptyList())
+    val repos = _repos.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
@@ -44,7 +45,7 @@ class GithubReposViewModel @Inject constructor(
         request = viewModelScope.launch(Dispatchers.IO) {
             _error.value = null
             try {
-                repos.emit(reposUseCase.userRepos(userName))
+                _repos.emit(reposUseCase.userRepos(userName))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

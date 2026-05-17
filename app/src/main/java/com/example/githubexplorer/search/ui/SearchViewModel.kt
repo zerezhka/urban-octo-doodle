@@ -24,10 +24,16 @@ class SearchViewModel @Inject constructor(private val useCase: SearchUseCase) : 
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
-    val searchResult = MutableStateFlow<List<GithubUser>>(emptyList())
-    val query = MutableStateFlow("")
+    private val _searchResult = MutableStateFlow<List<GithubUser>>(emptyList())
+    val searchResult = _searchResult.asStateFlow()
+
+    private val _query = MutableStateFlow("")
+    val query = _query.asStateFlow()
 
     private var request: Job? = null
+
+    fun updateQuery(value: String) { _query.value = value }
+    fun clearQuery() { _query.value = "" }
 
     fun search(query: String) {
         request?.cancel()
@@ -35,7 +41,7 @@ class SearchViewModel @Inject constructor(private val useCase: SearchUseCase) : 
             _isLoading.value = true
             _error.value = null
             try {
-                searchResult.emit(useCase.search(query))
+                _searchResult.emit(useCase.search(query))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
